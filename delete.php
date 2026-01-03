@@ -10,7 +10,7 @@ $data = mysqli_fetch_assoc($q);
 if(!empty($data['file_path']) && file_exists($data['file_path'])){
     unlink($data['file_path']);
 }
-// testing pull request
+
 // Delete from DB
 mysqli_query($conn, "DELETE FROM messages WHERE id=$id");
 ?>

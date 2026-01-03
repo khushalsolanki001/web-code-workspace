@@ -1,7 +1,11 @@
 <?php
-$conn = mysqli_connect("localhost", "root", "", "chat_db");
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
-?>
+$conn = new mysqli(
+    "localhost",
+    "chat_user",
+    "",
+    "chat_db"
+);
+
+$conn->set_charset("utf8mb4");
