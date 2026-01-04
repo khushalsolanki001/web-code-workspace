@@ -12,7 +12,7 @@ if (empty($message)) {
     echo json_encode(['error' => 'No message provided']);
     exit;
 }
-
+//this part was not working here
 // Load Groq API Key from .env file
 $apiKey = '';
 
