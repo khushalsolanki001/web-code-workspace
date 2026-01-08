@@ -350,7 +350,7 @@
         #code {
             width: 100%;
             height: 100%;
-            background: var(--vscode-editor);
+            background: #1e1e1e;
             color: #d4d4d4;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 14px;
@@ -359,6 +359,7 @@
             border: none;
             outline: none;
             resize: none;
+            caret-color: #aeafad;
         }
         
         /* Right Sidebar (AI Panel) */
@@ -711,11 +712,18 @@
         <!-- Editor Area -->
         <div class="editor-container">
             <div class="editor-tabs" id="editorTabs">
-                <!-- Tabs will be dynamically added here -->
+                <!-- Default live editor tab (cannot be closed) -->
+                <div class="editor-tab active" data-file="LIVE" id="liveTab" onclick="switchToLiveTab()">
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M9 1H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8h-1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5v1z"/>
+                        <path d="M14.5 0L11 .5V3h3V.5z"/>
+                    </svg>
+                    <span class="tab-name">Live Editor</span>
+                </div>
             </div>
             <div class="editor-content">
-                <textarea id="code" spellcheck="false" placeholder="No file open. Click a file in the explorer to open it." style="display: none;"></textarea>
-                <div id="noFileOpen" style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--vscode-text-secondary); font-size: 14px;">
+                <textarea id="code" spellcheck="false" placeholder="Shared live editor. Type here and press Save to sync with everyone."></textarea>
+                <div id="noFileOpen" style="display: none; align-items: center; justify-content: center; height: 100%; color: var(--vscode-text-secondary); font-size: 14px;">
                     No file open. Click a file in the explorer to open it.
                 </div>
             </div>
@@ -749,39 +757,52 @@
         </div>
     </div>
 
-    <!-- Status Bar -->
-    <div class="statusbar">
-        <div class="statusbar-left">
-            <div class="statusbar-item">
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                    <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                    <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-                </svg>
-                <span>Ready</span>
-            </div>
-            <div class="statusbar-item">
-                <span>Ln 1, Col 1</span>
-            </div>
-            <div class="statusbar-item">
-                <span>Spaces: 4</span>
-            </div>
+   <!-- Status Bar -->
+<div class="statusbar">
+    <div class="statusbar-left">
+        <div class="statusbar-item">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+            </svg>
+            <span>Ready</span>
         </div>
-        <div class="statusbar-right">
-            <div class="statusbar-item">
-                <span>UTF-8</span>
-            </div>
-            <div class="statusbar-item">
-                <span>PHP</span>
-            </div>
+        <div class="statusbar-item">
+            <span>Ln 1, Col 1</span>
+        </div>
+        <div class="statusbar-item">
+            <span>Spaces: 4</span>
         </div>
     </div>
+
+    <!-- CENTER -->
+    <div class="statusbar-center">
+    © 2025 MCA Pro Portal | Developed by :
+    <a href="https://www.instagram.com/m_b.solanki203" 
+       target="_blank"
+       class="text-white font-semibold hover:text-indigo-400 transition">
+        @ m_b.solanki203
+    </a>
+    </div>
+
+    <div class="statusbar-right">
+        <div class="statusbar-item">
+            <span>UTF-8</span>
+        </div>
+        <div class="statusbar-item">
+            <span>PHP</span>
+        </div>
+    </div>
+</div>
+
 
     <script>
         let currentWorkspace = 'SET-A';
         let currentSidebar = 'chat';
         let selectedFile = null;
         let openFiles = {}; // { filePath: { name, content, modified } }
-        let activeTab = null;
+        // Default active tab is the shared live editor
+        let activeTab = 'LIVE';
         
         // Custom Notification Function
         function showNotify(msg, type='info') {
@@ -945,6 +966,12 @@
             if (!confirm("Are you sure you want to delete this file? This action cannot be undone.")) {
                 return;
             }
+
+            const pwd = prompt("Enter password to delete this file:");
+            if (pwd !== '203') {
+                showNotify("❌ Incorrect password", "error");
+                return;
+            }
             
             // Close tab first if open
             if (openFiles[filePath]) {
@@ -970,7 +997,7 @@
         }
 
         function switchWorkspace(workspace) {
-            // Close all open files
+            // Close all open file tabs (but keep LIVE editor)
             const openFilePaths = Object.keys(openFiles);
             openFilePaths.forEach(filePath => {
                 closeTab(filePath);
@@ -1015,6 +1042,8 @@
         function updateStatusBar(fileName) {
             if (fileName) {
                 $(".statusbar-item:contains('PHP')").html(fileName.split('.').pop().toUpperCase() || 'TEXT');
+            } else {
+                $(".statusbar-item:contains('PHP')").html('LIVE');
             }
         }
         
@@ -1038,7 +1067,7 @@
             }
         }
 
-        // Save current file
+        // Save current file or live editor
         function saveCode(){
             if (!activeTab) {
                 showNotify("⚠️ No file open to save!", "error");
@@ -1046,6 +1075,18 @@
             }
             
             const content = $("#code").val();
+
+            // Live shared editor
+            if (activeTab === 'LIVE') {
+                $.post("save_code.php", { code: content }, function() {
+                    showNotify("✅ Live editor synced for everyone!", "success");
+                }).fail(function() {
+                    showNotify("❌ Failed to save live editor", "error");
+                });
+                return;
+            }
+            
+            // Workspace file
             const filePath = activeTab;
             
             $.post("file_operations.php", {
@@ -1069,9 +1110,15 @@
             });
         }
 
+        // Live editor auto-refresh (for other users' saves)
         function refreshCode(){
-            // Refresh is not needed for file-based system
-            // But keep for backward compatibility
+            if (activeTab !== 'LIVE') return;
+            if ($("#code").is(":focus")) return;
+
+            $.get("save_code.php", function(d) {
+                $("#code").val(d);
+                updateCursorPosition();
+            });
         }
 
         function copyCode(){
@@ -1330,8 +1377,10 @@
 
         // Update cursor position in status bar
         function updateCursorPosition() {
+            const el = $("#code")[0];
+            if (!el) return;
             const text = $("#code").val();
-            const cursorPos = $("#code")[0].selectionStart;
+            const cursorPos = el.selectionStart || 0;
             const textBeforeCursor = text.substring(0, cursorPos);
             const lines = textBeforeCursor.split('\n');
             const line = lines.length;
@@ -1351,11 +1400,33 @@
             }
         });
 
+        // Switch to live editor tab and load shared content
+        function switchToLiveTab() {
+            // Save current file content if modified
+            if (activeTab && activeTab !== 'LIVE' && openFiles[activeTab] && openFiles[activeTab].modified) {
+                openFiles[activeTab].content = $("#code").val();
+            }
+
+            $(".editor-tab").removeClass("active");
+            $("#liveTab").addClass("active");
+            activeTab = 'LIVE';
+
+            $.get("save_code.php", function(d) {
+                $("#code").val(d);
+                $("#code").show();
+                $("#noFileOpen").hide();
+                updateStatusBar('LIVE');
+                updateCursorPosition();
+            });
+        }
+
         // Initialize
         setInterval(loadMessages, 3000);
         setInterval(loadFiles, 5000);
+        setInterval(refreshCode, 4000);
         loadMessages();
         loadFiles();
+        switchToLiveTab();
         
         // Make deleteFile available globally
         window.deleteFile = deleteFile;
