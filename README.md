@@ -1,102 +1,108 @@
 # Web Code Workspace
 
-A collaborative web-based code workspace with a **VS Code-like interface** for editing code, managing files/folders, and an integrated **AI-powered chat assistant** for coding help.
+Web Code Workspace is a collaborative web-based coding environment with a VS Code–like interface. It allows users to edit code, manage files and folders, and interact with an AI-powered chat assistant for real-time coding help directly in the browser.
 
 ## Features
 
 - VS Code-style code editor with syntax highlighting
-- Upload, create, delete, and organize files & folders
-- Persistent storage of code and files (database-backed)
-- Integrated AI chat for asking coding questions
-- Real-time workspace management
-
-## Screenshots
-
-*(Optional: Add screenshots to a `screenshots/` folder and link them here later)*
+- Create, upload, delete, and organize files and folders
+- Persistent storage using a MySQL database
+- Integrated AI chat assistant for coding support
+- Real-time workspace and file management
+- Browser-based coding with a clean and simple UI
 
 ## Technologies Used
 
-- **Backend**: PHP
-- **Database**: MySQL
-- **Frontend**: HTML, CSS, JavaScript (with editor library like CodeMirror or Monaco)
-- **Server**: Apache (tested with XAMPP on Windows)
+Backend:
+- PHP
 
-## Installation & Setup (Local Development on Windows 10 with XAMPP)
+Database:
+- MySQL
+
+Frontend:
+- HTML
+- CSS
+- JavaScript
+- Code editor library (CodeMirror or Monaco Editor)
+
+Server:
+- Apache (tested using XAMPP on Windows)
+
+## Installation & Setup (Windows 10 with XAMPP)
 
 ### Prerequisites
-- [XAMPP](https://www.apachefriends.org/index.html) installed on Windows 10
-- Git (optional, for cloning)
+- XAMPP installed
+- Git (optional)
 
-### Steps
-
-1. **Clone or Download the Repository**
-   ```bash
-   git clone https://github.com/khushalsolanki001/web-code-workspace.git
-   ```
-
-   Or download and extract the ZIP file.
-
-2 **Copy Files to XAMPP**
-Copy the entire project folder (recommended name: cp) into C:\xampp\htdocs\
-Final path: C:\xampp\htdocs\cp
-
-3 **Start XAMPP Services**
-Open XAMPP Control Panel
-Start Apache and MySQL
-
-4 **Import the Database**
-Open phpMyAdmin: http://localhost/phpmyadmin
-Click the Databases tab
-Create a new database named chat_db
-Select the chat_db database from the left sidebar
-Click the Import tab
-Click Choose File and select: database/chat_db.sql (from your project folder)
-Leave all settings as default
-Click Go at the bottom
-You should see: "Import has been successfully finished"
-Alternative (if phpMyAdmin fails due to large file):
-Open Command Prompt as Administrator
-Run:cmdcd C:\xampp\mysql\bin
-mysql -u root -p chat_db < C:\xampp\htdocs\cp\database\chat_db.sql
-Press Enter (no password for default XAMPP root)
-
-5 **Configure Database Connection (usually not needed)**
-Open C:\xampp\htdocs\cp\db.php
-Default XAMPP settings (should work):
-
+### Step 1: Clone or Download the Repository
 ```bash
+git clone https://github.com/khushalsolanki001/web-code-workspace.git
+```
+### Step 2: Copy Project to XAMPP
+Copy the project folder to:
+C:\xampp\htdocs\
+Recommended folder name:
+C:\xampp\htdocs\cp
+
+### Step 3: Start XAMPP Services
+Open XAMPP Control Panel and start Apache and MySQL.
+
+### Step 4: Import the Database
+Open http://localhost/phpmyadmin  
+Create a database named chat_db  
+Select the chat_db database  
+Import the file: database/chat_db.sql  
+
+If phpMyAdmin fails, use Command Prompt:
+cd C:\xampp\mysql\bin  
+mysql -u root -p chat_db < C:\xampp\htdocs\cp\database\chat_db.sql  
+
+Press Enter when asked for a password.
+
+### Step 5: Database Configuration
+File: C:\xampp\htdocs\cp\db.php
+
+Default configuration:
 $host = 'localhost';
 $username = 'root';
-$password = '';          // Empty password
+$password = '';
 $database = 'chat_db';
-```
 
-6 **Run the Project**
-Open your browser and go to: http://localhost/cp/
-Or: http://localhost/cp/index.php
-The workspace should load with all features working.
+### Step 6: Run the Project
+Open your browser and visit:
+http://localhost/cp/
+or
+http://localhost/cp/index.php
 
+## Usage
 
-**Usage**
+- Edit code directly in the browser editor
+- Manage files and folders using the sidebar
+- Chat with the AI assistant for instant coding help
+- All changes are saved automatically to the database
 
-Edit code directly in the browser editor
-Manage files and folders using the sidebar
-Chat with the AI assistant for instant coding help
-All changes are saved automatically to the database
+## Troubleshooting
 
-**Troubleshooting**
+- Database errors: Re-import the SQL file and verify database name
+- Blank page: Ensure Apache and MySQL are running
+- UI issues: Clear browser cache (Ctrl + F5)
 
-Database errors → Re-import the SQL file or check database name
-Blank page → Ensure Apache & MySQL are running in XAMPP
-UI issues → Clear browser cache (Ctrl + F5)
+## Contributing
 
-**Contributing**
-Contributions are welcome! Fork the repo, create a branch, and submit a Pull Request.
-**License**
-MIT License – see the LICENSE file for details.
-**Author**
-Khushal Solanki
-GitHub: @khushalsolanki001
-X/Twitter: @tecnogame1234
+Contributions are welcome. Fork the repository, create a branch, and submit a pull request.
+
+## License
+
+MIT License. See the LICENSE file for details.
+
+## Authors
+
+Khushal Solanki  
+GitHub: https://github.com/khushalsolanki001  
+X / Twitter: https://twitter.com/tecnogame1234  
+
+Mehul Solanki  
+GitHub: https://github.com/Mehul203  
+Instagram: https://instagram.com/m_b.solanki203  
 
 Enjoy your collaborative code workspace! 🚀
