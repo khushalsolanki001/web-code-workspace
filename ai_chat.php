@@ -12,7 +12,7 @@ if (empty($message)) {
     echo json_encode(['error' => 'No message provided']);
     exit;
 }
-//this part was not working here
+
 // Load Groq API Key from .env file
 $apiKey = '';
 
@@ -63,21 +63,53 @@ $model = "llama-3.3-70b-versatile";
 // Groq's OpenAI-compatible endpoint
 $url = "https://api.groq.com/openai/v1/chat/completions";
 
+// Get current code context if provided
+$currentCode = $data['currentCode'] ?? '';
+
+// Build enhanced system prompt for programming
+$systemPrompt = "You are an expert programming and coding assistant specialized in software development. Your role is to:
+
+1. **Code Analysis & Debugging**: Analyze code, identify bugs, suggest fixes, and explain issues clearly
+2. **Code Generation**: Write clean, efficient, well-documented code following best practices
+3. **Code Review**: Review code for improvements, optimization opportunities, and security issues
+4. **Explanations**: Explain programming concepts, algorithms, and code logic in detail
+5. **Best Practices**: Suggest modern coding patterns, design principles, and industry standards
+
+**Guidelines:**
+- Always provide code examples when relevant
+- Use proper code formatting with syntax highlighting markers
+- Explain your reasoning and approach
+- Consider performance, security, and maintainability
+- Support multiple programming languages
+- Provide complete, runnable code when possible
+- Include comments for complex logic
+
+**Code Formatting:**
+- Wrap code blocks in triple backticks with language identifier (e.g., ```javascript, ```python, ```php)
+- Use inline code with single backticks for variables, functions, and short code snippets
+- Format code with proper indentation and structure";
+
+// Build user message with context
+$userMessage = $message;
+if (!empty($currentCode)) {
+    $userMessage = "Current code in editor:\n```\n" . substr($currentCode, 0, 2000) . "\n```\n\nUser question: " . $message;
+}
+
 // Prepare request in OpenAI format
 $postData = [
     'model' => $model,
     'messages' => [
         [
             'role' => 'system',
-            'content' => 'You are a helpful coding assistant. Provide clear, concise, and accurate responses about programming and code.'
+            'content' => $systemPrompt
         ],
         [
             'role' => 'user',
-            'content' => $message
+            'content' => $userMessage
         ]
     ],
-    'max_tokens' => 1000,
-    'temperature' => 0.7
+    'max_tokens' => 2000, // Increased for longer code explanations
+    'temperature' => 0.3 // Lower temperature for more focused, accurate code responses
 ];
 
 // Initialize cURL

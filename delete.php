@@ -1,4 +1,3 @@
-//hello
 <?php
 include 'db.php';
 $id = (int)$_GET['id'];
