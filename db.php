@@ -1,11 +1,14 @@
 <?php
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$host = 'localhost';
+$username = 'root';          // Change to root
+$password = '';              // Empty password (default in XAMPP)
+$database = 'chat_db';
 
-$conn = new mysqli(
-    "localhost",
-    "chat_user",
-    "",
-    "chat_db"
-);
+// Create connection
+$conn = new mysqli($host, $username, $password, $database);
 
-$conn->set_charset("utf8mb4");
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
