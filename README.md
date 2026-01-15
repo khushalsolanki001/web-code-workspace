@@ -123,7 +123,7 @@ web-code-workspace/
 - **Code Editor:** Write and edit code directly in the browser with syntax highlighting.
 - **Sidebar:** Manage your project structure by creating, deleting, or renaming files and folders.
 - **AI Assistant:** Use the built-in chat window to ask coding questions or get debugging help.
-- **Auto-Save:** All changes are automatically synchronized with the database.
+- **Auto-Save:** All changes are automatically synchronized with the database and live changes.
 
 ---
 
