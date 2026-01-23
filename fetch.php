@@ -1,10 +1,7 @@
 <?php
 require_once __DIR__ . "/db.php";
 
-$workspace = $_GET['workspace'] ?? 'SET-A';
-$workspace = mysqli_real_escape_string($conn, $workspace);
-
-$result = $conn->query("SELECT * FROM messages WHERE workspace = '$workspace' ORDER BY id ASC");
+$result = $conn->query("SELECT * FROM messages ORDER BY id ASC");
 
 while ($row = $result->fetch_assoc()) {
     $id = (int)$row['id'];

@@ -1,1435 +1,1193 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Visual Studio Code</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Studio Code - Web</title>
+
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/css/xterm.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
+        :root {
+            --vscode-bg: #1e1e1e;
+            --vscode-sidebar-bg: #252526;
+            --vscode-activitybar-bg: #333333;
+            --vscode-titlebar-bg: #3c3c3c;
+            --vscode-statusbar-bg: #007acc;
+            --vscode-panel-bg: #1e1e1e;
+            --vscode-border: #474747;
+            --vscode-text: #cccccc;
+            --vscode-text-secondary: #969696;
+            --vscode-hover: #2a2d2e;
+            --vscode-selection: #37373d;
+            --vscode-activitybar-active: #ffffff;
+            --vscode-activitybar-inactive: #808080;
+            --vscode-tab-bg: #2d2d2d;
+            --vscode-tab-active-bg: #1e1e1e;
+            --vscode-menu-bg: #3c3c3c;
+            --vscode-menu-hover: #094771;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        body { 
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--vscode-bg);
+            color: var(--vscode-text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
-            background: #1e1e1e;
-            color: #cccccc;
+            font-size: 13px;
         }
-        
-        /* VS Code Color Scheme */
-        :root {
-            --vscode-bg: #1e1e1e;
-            --vscode-sidebar: #252526;
-            --vscode-activitybar: #2d2d30;
-            --vscode-editor: #1e1e1e;
-            --vscode-titlebar: #3c3c3c;
-            --vscode-menubar: #2d2d30;
-            --vscode-statusbar: #007acc;
-            --vscode-text: #cccccc;
-            --vscode-text-secondary: #858585;
-            --vscode-border: #3e3e42;
-            --vscode-hover: #2a2d2e;
-            --vscode-active: #094771;
-        }
-        
+
         /* Title Bar */
-        .titlebar {
-            background: var(--vscode-titlebar);
+        #titlebar {
             height: 30px;
+            background-color: var(--vscode-titlebar-bg);
             display: flex;
             align-items: center;
-            padding: 0 8px;
-            -webkit-app-region: drag;
+            padding: 0 10px;
             user-select: none;
-            border-bottom: 1px solid var(--vscode-border);
+            justify-content: space-between;
         }
-        
-        .titlebar-logo {
+
+        .menubar {
+            display: flex;
+            gap: 4px;
+            position: relative;
+        }
+
+        .menu-item {
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .window-title {
+            color: var(--vscode-text-secondary);
+            font-size: 12px;
+        }
+
+        /* Dropdown Menus */
+        .dropdown {
+            position: absolute;
+            top: 25px;
+            left: 0;
+            background-color: var(--vscode-menu-bg);
+            border: 1px solid var(--vscode-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            min-width: 220px;
+            padding: 4px 0;
+        }
+
+        .dropdown-item {
+            padding: 4px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--vscode-menu-hover);
+            color: white;
+        }
+
+        .shortcut {
+            color: var(--vscode-text-secondary);
+            font-size: 11px;
+            margin-left: 10px;
+        }
+
+        .separator {
+            height: 1px;
+            background-color: var(--vscode-border);
+            margin: 4px 0;
+        }
+
+        /* Main Workspace */
+        #workbench {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Activity Bar */
+        #activitybar {
+            width: 48px;
+            background-color: var(--vscode-activitybar-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+            gap: 15px;
+        }
+
+        .activity-icon {
+            font-size: 24px;
+            color: var(--vscode-activitybar-inactive);
+            cursor: pointer;
+            padding: 10px 0;
+            width: 100%;
+            text-align: center;
+            border-left: 2px solid transparent;
+        }
+
+        .activity-icon:hover {
+            color: var(--vscode-activitybar-active);
+        }
+
+        .activity-icon.active {
+            color: var(--vscode-activitybar-active);
+            border-left-color: var(--vscode-activitybar-active);
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 250px;
+            background-color: var(--vscode-sidebar-bg);
+            border-right: 1px solid var(--vscode-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-title {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--vscode-text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-actions {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar-title:hover .sidebar-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        #file-explorer {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .explorer-item {
+            padding: 4px 10px 4px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .explorer-item:hover {
+            background-color: var(--vscode-hover);
+        }
+
+        .explorer-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        .fa-folder {
+            color: #dcb67a;
+        }
+
+        .fa-file-code {
+            color: #4d9375;
+        }
+
+        .fa-php {
+            color: #777bb3;
+        }
+
+        .fa-js {
+            color: #f1e05a;
+        }
+
+        .fa-html5 {
+            color: #e34c26;
+        }
+
+        .fa-css3-alt {
+            color: #563d7c;
+        }
+
+        .fa-terminal {
+            color: #cccccc;
+        }
+
+        /* Editor Area */
+        #editor-groups {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--vscode-bg);
+        }
+
+        /* Tabs */
+        #tabs-container {
+            height: 35px;
+            background-color: var(--vscode-sidebar-bg);
+            display: flex;
+            align-items: flex-end;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 8px 15px;
+            background-color: var(--vscode-tab-bg);
+            border-right: 1px solid var(--vscode-border);
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 0 12px;
-            -webkit-app-region: no-drag;
-        }
-        
-        .titlebar-logo img {
-            width: 16px;
-            height: 16px;
-        }
-        
-        .titlebar-title {
-            font-size: 12px;
-            color: var(--vscode-text);
-            margin-left: 8px;
-        }
-        
-        /* Menu Bar */
-        .menubar {
-            background: var(--vscode-menubar);
-            height: 30px;
-            display: flex;
-            align-items: center;
-            padding: 0 8px;
-            border-bottom: 1px solid var(--vscode-border);
-            font-size: 13px;
-        }
-        
-        .menubar-item {
-            padding: 4px 8px;
-            cursor: pointer;
-            color: var(--vscode-text);
-            border-radius: 3px;
-            transition: background 0.1s;
-        }
-        
-        .menubar-item:hover {
-            background: var(--vscode-hover);
-        }
-        
-        /* Activity Bar */
-        .activitybar {
-            width: 48px;
-            background: var(--vscode-activitybar);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px 0;
-            border-right: 1px solid var(--vscode-border);
-        }
-        
-        .activitybar-item {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            min-width: 120px;
             color: var(--vscode-text-secondary);
-            transition: all 0.1s;
-            position: relative;
+            border-top: 2px solid transparent;
         }
-        
-        .activitybar-item:hover {
+
+        .tab.active {
+            background-color: var(--vscode-tab-active-bg);
             color: var(--vscode-text);
+            border-top-color: var(--vscode-statusbar-bg);
         }
-        
-        .activitybar-item.active {
-            color: var(--vscode-text);
-        }
-        
-        .activitybar-item.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--vscode-statusbar);
-        }
-        
-        .activitybar-item svg {
-            width: 24px;
-            height: 24px;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            width: 300px;
-            background: var(--vscode-sidebar);
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--vscode-border);
-            position: relative;
-        }
-        
-        .sidebar-resizer {
-            width: 4px;
-            background: transparent;
-            cursor: col-resize;
-            position: absolute;
-            right: -2px;
-            top: 0;
-            bottom: 0;
-            z-index: 10;
-        }
-        
-        .sidebar-resizer:hover {
-            background: var(--vscode-statusbar);
-        }
-        
-        .sidebar-resizer.resizing {
-            background: var(--vscode-statusbar);
-        }
-        
-        .sidebar-header {
-            padding: 8px 12px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--vscode-text-secondary);
-            border-bottom: 1px solid var(--vscode-border);
-            letter-spacing: 0.5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .workspace-selector {
-            display: flex;
-            gap: 4px;
-            font-size: 10px;
-        }
-        
-        .workspace-btn {
-            padding: 2px 6px;
-            background: var(--vscode-hover);
-            border: 1px solid var(--vscode-border);
-            color: var(--vscode-text-secondary);
-            cursor: pointer;
-            border-radius: 2px;
-        }
-        
-        .workspace-btn.active {
-            background: var(--vscode-statusbar);
-            color: white;
-            border-color: var(--vscode-statusbar);
-        }
-        
-        .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px;
-        }
-        
-        /* File Explorer */
-        .file-explorer {
-            padding: 4px 0;
-        }
-        
-        .file-item {
-            padding: 4px 8px 4px 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: var(--vscode-text);
-            position: relative;
-        }
-        
-        .file-item:hover {
-            background: var(--vscode-hover);
-        }
-        
-        .file-item.selected {
-            background: var(--vscode-active);
-        }
-        
-        .file-icon {
-            width: 16px;
-            height: 16px;
-            flex-shrink: 0;
-        }
-        
-        .file-name {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .file-actions {
-            display: none;
-            gap: 4px;
-        }
-        
-        .file-item:hover .file-actions {
-            display: flex;
-        }
-        
-        .file-action-btn {
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-            color: var(--vscode-text-secondary);
-        }
-        
-        .file-action-btn:hover {
-            background: var(--vscode-hover);
-            color: var(--vscode-text);
-        }
-        
-        .file-action-btn.delete:hover {
-            background: #a1260d;
-            color: white;
-        }
-        
-        /* Editor Area */
-        .editor-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--vscode-editor);
-        }
-        
-        .editor-tabs {
-            background: var(--vscode-titlebar);
-            height: 35px;
-            display: flex;
-            align-items: center;
-            padding: 0 8px;
-            border-bottom: 1px solid var(--vscode-border);
-            overflow-x: auto;
-        }
-        
-        .editor-tab {
-            padding: 6px 16px 6px 8px;
-            background: var(--vscode-titlebar);
-            color: var(--vscode-text-secondary);
-            cursor: pointer;
-            border-right: 1px solid var(--vscode-border);
-            font-size: 13px;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            position: relative;
-        }
-        
-        .editor-tab.active {
-            background: var(--vscode-editor);
-            color: var(--vscode-text);
-        }
-        
-        .editor-tab:hover {
-            background: var(--vscode-hover);
-        }
-        
-        .editor-tab:hover .tab-close {
-            opacity: 1;
-        }
-        
+
         .tab-close {
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 3px;
             opacity: 0;
-            transition: opacity 0.2s, background 0.2s;
-            cursor: pointer;
-            font-size: 14px;
-            line-height: 1;
+            font-size: 11px;
         }
-        
-        .tab-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .editor-tab.active .tab-close {
+
+        .tab:hover .tab-close {
             opacity: 1;
         }
-        
-        .editor-content {
+
+        /* Monaco Editor Container */
+        #monaco-editor-container {
             flex: 1;
             position: relative;
         }
-        
-        #code {
-            width: 100%;
-            height: 100%;
-            background: #1e1e1e;
-            color: #d4d4d4;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            padding: 20px;
-            border: none;
-            outline: none;
-            resize: none;
-            caret-color: #aeafad;
-        }
-        
-        /* Right Sidebar (AI Panel) */
-        .right-sidebar {
-            width: 350px;
-            background: var(--vscode-sidebar);
+
+        /* Panel (Terminal) */
+        #panel {
+            height: 200px;
+            border-top: 1px solid var(--vscode-border);
+            background-color: var(--vscode-panel-bg);
             display: flex;
             flex-direction: column;
-            border-left: 1px solid var(--vscode-border);
-            position: relative;
         }
-        
-        .right-sidebar-resizer {
-            width: 4px;
-            background: transparent;
-            cursor: col-resize;
-            position: absolute;
-            left: -2px;
-            top: 0;
-            bottom: 0;
-            z-index: 10;
+
+        .panel-header {
+            display: flex;
+            gap: 20px;
+            padding: 8px 15px;
+            border-bottom: 1px solid var(--vscode-border);
+            font-size: 11px;
+            text-transform: uppercase;
         }
-        
-        .right-sidebar-resizer:hover {
-            background: var(--vscode-statusbar);
+
+        .panel-tab {
+            cursor: pointer;
+            color: var(--vscode-text-secondary);
         }
-        
-        .right-sidebar-resizer.resizing {
-            background: var(--vscode-statusbar);
+
+        .panel-tab.active {
+            color: var(--vscode-text);
+            border-bottom: 1px solid var(--vscode-text);
         }
-        
+
+        #terminal-container {
+            flex: 1;
+            padding: 5px;
+            overflow: hidden;
+            background: #1e1e1e;
+        }
+
         /* Status Bar */
-        .statusbar {
+        #statusbar {
             height: 22px;
-            background: var(--vscode-statusbar);
+            background-color: var(--vscode-statusbar-bg);
             display: flex;
-            align-items: center;
-            padding: 0 8px;
-            font-size: 12px;
-            color: white;
             justify-content: space-between;
-        }
-        
-        .statusbar-left, .statusbar-right {
-            display: flex;
             align-items: center;
-            gap: 16px;
+            padding: 0 10px;
+            color: white;
+            font-size: 12px;
         }
-        
+
         .statusbar-item {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             cursor: pointer;
-            padding: 2px 4px;
-            border-radius: 2px;
+            padding: 0 5px;
         }
-        
+
         .statusbar-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.2);
         }
-        
-        /* Chat Messages */
-        .chat-message {
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            background: var(--vscode-hover);
-            border-radius: 4px;
-            font-size: 13px;
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
         }
-        
-        .chat-message-header {
-            font-weight: 600;
-            color: var(--vscode-statusbar);
-            margin-bottom: 4px;
-            font-size: 12px;
-        }
-        
-        .chat-input-container {
-            padding: 8px;
-            border-top: 1px solid var(--vscode-border);
-        }
-        
-        .chat-input {
-            width: 100%;
-            background: var(--vscode-editor);
-            border: 1px solid var(--vscode-border);
-            color: var(--vscode-text);
-            padding: 6px 8px;
-            border-radius: 3px;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        
-        .chat-input:focus {
-            outline: 1px solid var(--vscode-statusbar);
-        }
-        
-        .chat-button {
-            background: var(--vscode-statusbar);
-            color: white;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .chat-button:hover {
-            background: #0066aa;
-        }
-        
-        /* AI Chat */
-        #aiChatMessages {
+
+        /* Sidebar Views */
+        .sidebar-view {
+            display: none;
             flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-            font-size: 13px;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
         }
-        
-        .ai-message {
-            margin-bottom: 12px;
-            padding: 8px;
-            background: var(--vscode-hover);
-            border-radius: 4px;
+
+        .sidebar-view.active {
+            display: flex;
         }
-        
-        .ai-message.user {
-            background: var(--vscode-active);
-            margin-left: 20px;
+
+        .sidebar-input-container {
+            padding: 10px;
         }
-        
-        .ai-message.assistant {
-            background: var(--vscode-hover);
-            margin-right: 20px;
-        }
-        
-        #aiChatMessages pre {
-            background: #1e293b !important;
-            border-radius: 4px;
-            padding: 12px;
-            overflow-x: auto;
-            margin: 8px 0;
-            border: 1px solid var(--vscode-border);
-        }
-        
-        #aiChatMessages code {
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+
+        .sidebar-input {
+            width: 100%;
+            background-color: #3c3c3c;
+            border: 1px solid #3c3c3c;
+            color: #cccccc;
+            padding: 4px;
             font-size: 12px;
+            outline: none;
         }
-        
-        #aiChatMessages pre code {
-            background: transparent !important;
-            padding: 0;
-            color: #d4d4d4;
+
+        .sidebar-input:focus {
+            border-color: #007acc;
         }
-        
-        /* Toast Notifications */
-        .custom-toast { 
-            position: fixed; 
-            top: 60px; 
-            right: 20px; 
-            padding: 12px 20px; 
-            border-radius: 4px; 
-            color: white; 
-            z-index: 10000; 
-            display: none; 
-            font-weight: 500;
-            font-size: 13px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        
-        .bg-success { background: #0e639c; }
-        .bg-error { background: #a1260d; }
-        .bg-info { background: #007acc; }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--vscode-sidebar);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #424242;
-            border-radius: 5px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4e4e4e;
-        }
-        
-        /* Toolbar */
-        .toolbar {
+
+        .sidebar-section-title {
+            padding: 5px 20px;
+            font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 0 8px;
+            cursor: pointer;
         }
-        
-        .toolbar-button {
-            padding: 4px 8px;
-            background: transparent;
+
+        .sidebar-section-title:hover {
+            background-color: #2a2d2e;
+        }
+
+        /* AI Assistant Panel */
+        #ai-panel {
+            position: fixed;
+            right: -400px;
+            top: 30px;
+            bottom: 22px;
+            width: 400px;
+            background-color: var(--vscode-sidebar-bg);
+            border-left: 1px solid var(--vscode-border);
+            display: flex;
+            flex-direction: column;
+            transition: right 0.3s ease;
+            z-index: 1000;
+        }
+
+        #ai-panel.open {
+            right: 0;
+        }
+
+        .ai-header {
+            padding: 10px 15px;
+            background-color: var(--vscode-titlebar-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--vscode-border);
+        }
+
+        .ai-header h3 {
+            margin: 0;
+            font-size: 13px;
+            color: var(--vscode-text);
+        }
+
+        .ai-close {
+            cursor: pointer;
+            color: var(--vscode-text-secondary);
+        }
+
+        .ai-close:hover {
+            color: var(--vscode-text);
+        }
+
+        .ai-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .ai-message {
+            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .ai-message.user {
+            background-color: #094771;
+            text-align: right;
+        }
+
+        .ai-message.assistant {
+            background-color: var(--vscode-hover);
+        }
+
+        .ai-message pre {
+            background-color: #1e1e1e;
+            padding: 8px;
+            border-radius: 3px;
+            overflow-x: auto;
+            margin: 5px 0;
+        }
+
+        .ai-input-area {
+            padding: 10px;
+            border-top: 1px solid var(--vscode-border);
+        }
+
+        .ai-input {
+            width: 100%;
+            background-color: var(--vscode-bg);
             border: 1px solid var(--vscode-border);
             color: var(--vscode-text);
-            cursor: pointer;
-            border-radius: 3px;
+            padding: 8px;
             font-size: 12px;
-            transition: all 0.1s;
+            resize: vertical;
+            min-height: 60px;
+            font-family: 'Segoe UI', sans-serif;
         }
-        
-        .toolbar-button:hover {
-            background: var(--vscode-hover);
+
+        .ai-input:focus {
+            outline: none;
+            border-color: #007acc;
         }
-        
-        .toolbar-button.primary {
-            background: var(--vscode-statusbar);
+
+        .ai-send-btn {
+            margin-top: 5px;
+            background-color: #007acc;
             color: white;
-            border-color: var(--vscode-statusbar);
-        }
-        
-        .toolbar-button.primary:hover {
-            background: #0066aa;
-        }
-        
-        .close-btn {
-            background: transparent;
             border: none;
-            color: var(--vscode-text-secondary);
+            padding: 6px 12px;
             cursor: pointer;
-            padding: 2px 6px;
-            font-size: 16px;
-            line-height: 1;
+            font-size: 12px;
+            border-radius: 2px;
         }
-        
-        .close-btn:hover {
-            color: var(--vscode-text);
-            background: var(--vscode-hover);
+
+        .ai-send-btn:hover {
+            background-color: #005a9e;
+        }
+
+        .ai-send-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .ai-loading {
+            text-align: center;
+            padding: 10px;
+            color: var(--vscode-text-secondary);
         }
     </style>
 </head>
+
 <body>
-    <div id="toast" class="custom-toast"></div>
 
     <!-- Title Bar -->
-    <div class="titlebar">
-        <div class="titlebar-logo">
-            <img src="logo/vscode.png" alt="VS Code">
-            <span class="titlebar-title">Visual Studio Code</span>
+    <div id="titlebar">
+        <div class="menubar">
+            <img src="logo/vscode.png" height="16" alt="Icon" style="margin-right: 5px;">
+            <div class="menu-item" data-menu="file">File</div>
+            <div class="menu-item" data-menu="edit">Edit</div>
+            <div class="menu-item" data-menu="selection">Selection</div>
+            <div class="menu-item" data-menu="view">View</div>
+            <div class="menu-item" data-menu="go">Go</div>
+            <div class="menu-item" data-menu="run">Run</div>
+            <div class="menu-item" data-menu="terminal">Terminal</div>
+            <div class="menu-item" data-menu="help">Help</div>
+
+            <!-- File Menu Dropdown -->
+            <div class="dropdown" id="menu-file">
+                <div class="dropdown-item" onclick="createNewFile()">New Text File <span class="shortcut">Ctrl+N</span>
+                </div>
+                <div class="dropdown-item" onclick="createNewFolder()">New Folder</div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="document.getElementById('file-upload').click()">Open File...</div>
+                <div class="dropdown-item" onclick="alert('Open Folder: Not implemented in browser environment')">Open
+                    Folder...</div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="saveFile()">Save <span class="shortcut">Ctrl+S</span></div>
+                <div class="dropdown-item" onclick="saveFileAs()">Save As... <span class="shortcut">Ctrl+Shift+S</span>
+                </div>
+                <div class="dropdown-item" onclick="toggleAutoSave()">Auto Save <span id="autosave-indicator"></span>
+                </div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="closeFile()">Close Editor <span class="shortcut">Ctrl+F4</span>
+                </div>
+                <div class="dropdown-item" onclick="closeWorkspace()">Close Workspace</div>
+            </div>
+            <input type="file" id="file-upload" style="display:none" onchange="handleFileUpload(event)" multiple>
+
+            <!-- Edit Menu Dropdown -->
+            <div class="dropdown" id="menu-edit">
+                <div class="dropdown-item" onclick="triggerEdit('undo')">Undo <span class="shortcut">Ctrl+Z</span></div>
+                <div class="dropdown-item" onclick="triggerEdit('redo')">Redo <span class="shortcut">Ctrl+Y</span></div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="triggerEdit('cut')">Cut <span class="shortcut">Ctrl+X</span></div>
+                <div class="dropdown-item" onclick="triggerEdit('copy')">Copy <span class="shortcut">Ctrl+C</span></div>
+                <div class="dropdown-item" onclick="triggerEdit('paste')">Paste <span class="shortcut">Ctrl+V</span>
+                </div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="triggerEdit('find')">Find <span class="shortcut">Ctrl+F</span></div>
+                <div class="dropdown-item" onclick="triggerEdit('replace')">Replace <span class="shortcut">Ctrl+H</span>
+                </div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="triggerEdit('comment')">Toggle Line Comment <span
+                        class="shortcut">Ctrl+/</span></div>
+                <div class="dropdown-item" onclick="triggerEdit('format')">Format Document <span
+                        class="shortcut">Shift+Alt+F</span></div>
+            </div>
+
+            <!-- Selection Menu Dropdown -->
+            <div class="dropdown" id="menu-selection">
+                <div class="dropdown-item" onclick="triggerSelection('all')">Select All <span
+                        class="shortcut">Ctrl+A</span></div>
+                <div class="dropdown-item" onclick="triggerSelection('expand')">Expand Selection <span
+                        class="shortcut">Shift+Alt+Right</span></div>
+            </div>
+
+            <!-- View Menu Dropdown -->
+            <div class="dropdown" id="menu-view">
+                <div class="dropdown-item" onclick="togglePanel()">Toggle Terminal <span class="shortcut">Ctrl+`</span>
+                </div>
+                <div class="dropdown-item" onclick="toggleSidebar()">Toggle Sidebar <span class="shortcut">Ctrl+B</span>
+                </div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="triggerView('minimap')">Toggle Minimap</div>
+                <div class="dropdown-item" onclick="triggerView('wordwrap')">Toggle Word Wrap <span
+                        class="shortcut">Alt+Z</span></div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="triggerView('zoomin')">Zoom In <span class="shortcut">Ctrl+=</span>
+                </div>
+                <div class="dropdown-item" onclick="triggerView('zoomout')">Zoom Out <span
+                        class="shortcut">Ctrl+-</span></div>
+                <div class="dropdown-item" onclick="triggerView('zoomreset')">Reset Zoom</div>
+            </div>
+
+            <!-- Go Menu Dropdown -->
+            <div class="dropdown" id="menu-go">
+                <div class="dropdown-item" onclick="triggerGo('file')">Go to File... <span
+                        class="shortcut">Ctrl+P</span></div>
+                <div class="dropdown-item" onclick="triggerGo('line')">Go to Line... <span
+                        class="shortcut">Ctrl+G</span></div>
+            </div>
+
+            <!-- Run Menu Dropdown -->
+            <div class="dropdown" id="menu-run">
+                <div class="dropdown-item" onclick="executeRun()">Start Debugging <span class="shortcut">F5</span></div>
+                <div class="dropdown-item" onclick="executeRun()">Run Without Debugging <span
+                        class="shortcut">Ctrl+F5</span></div>
+            </div>
+
+            <!-- Terminal Menu Dropdown -->
+            <div class="dropdown" id="menu-terminal">
+                <div class="dropdown-item" onclick="togglePanel()">New Terminal <span
+                        class="shortcut">Ctrl+Shift+`</span></div>
+                <div class="dropdown-item" onclick="executeCommand('cls')">Clear Terminal</div>
+            </div>
+
+            <!-- Help Menu Dropdown -->
+            <div class="dropdown" id="menu-help">
+                <div class="dropdown-item" onclick="triggerHelp()">About</div>
+                <div class="dropdown-item"
+                    onclick="alert('Accessibility Options: \nUse Alt+F1 for Screen Reader Access.\nHigh Contrast Theme is available in settings.')">
+                    Accessibility Options</div>
+            </div>
+
         </div>
-        <div style="flex: 1;"></div>
-        <div class="toolbar">
-            <button class="toolbar-button primary" onclick="saveCode()" title="Save (Ctrl+S)">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
-                    <path d="M13.853 3.646l-2.5-2.5a.5.5 0 0 0-.707 0l-2.5 2.5a.5.5 0 0 0 .707.707L10.5 2.707V12.5a.5.5 0 0 1-1 0V2.707L8.854 4.354a.5.5 0 1 0 .707.707l2.5-2.5zm-7.5 2.5a.5.5 0 0 1 .707 0L9.293 7.5H1.5a.5.5 0 0 0 0 1h7.793L7.06 10.232a.5.5 0 1 0 .707.707l3.5-3.5a.5.5 0 0 0 0-.707l-3.5-3.5a.5.5 0 0 0-.707 0z"/>
-                </svg>
-                Save
-            </button>
-            <button class="toolbar-button" onclick="copyCode()" title="Copy">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
-                    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-                    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-                </svg>
-                Copy
-            </button>
-            <button class="toolbar-button" onclick="refreshCode()" title="Refresh">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
-                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-                </svg>
-                Sync
-            </button>
+        <div class="window-title">Web Code Workspace</div>
+        <div class="window-controls">
+            <i class="fas fa-window-minimize" style="padding: 0 8px;"></i>
+            <i class="fas fa-window-maximize" style="padding: 0 8px;"></i>
+            <i class="fas fa-times" style="padding: 0 8px;"></i>
         </div>
     </div>
 
-    <!-- Menu Bar -->
-    <div class="menubar">
-        <div class="menubar-item">File</div>
-        <div class="menubar-item">Edit</div>
-        <div class="menubar-item">Selection</div>
-        <div class="menubar-item">View</div>
-        <div class="menubar-item">Go</div>
-        <div class="menubar-item">Run</div>
-        <div class="menubar-item">Terminal</div>
-        <div class="menubar-item">Help</div>
-    </div>
-
-    <!-- Main Container -->
-    <div style="display: flex; height: calc(100vh - 82px);">
+    <!-- Main Workbench -->
+    <div id="workbench">
         <!-- Activity Bar -->
-        <div class="activitybar">
-            <div class="activitybar-item active" onclick="toggleSidebar('chat')" title="Chat">
-                <svg viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
-                </svg>
+        <div id="activitybar">
+            <div class="activity-icon active" title="Explorer" onclick="switchSidebar('explorer')"><i
+                    class="far fa-copy"></i></div>
+            <div class="activity-icon" title="Search" onclick="switchSidebar('search')"><i class="fas fa-search"></i>
             </div>
-            <div class="activitybar-item" onclick="toggleSidebar('explorer')" title="Explorer">
-                <svg viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.553.69 2.301 1.191A1.5 1.5 0 0 0 9.796 3.5h4.204A1.5 1.5 0 0 1 15.5 5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zM2.5 3a.5.5 0 0 0-.5.5V6h12v-.5a.5.5 0 0 0-.5-.5H9.796a1.5 1.5 0 0 1-1.225-.58L7.964 2.426A.5.5 0 0 0 7.571 2H2.5zM14 7H2v5.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V7z"/>
-                </svg>
+            <div class="activity-icon" title="Source Control" onclick="switchSidebar('scm')"><i
+                    class="fas fa-code-branch"></i></div>
+            <div class="activity-icon" title="Run and Debug" onclick="switchSidebar('run')"><i class="fas fa-play"></i>
             </div>
-            <div class="activitybar-item" onclick="toggleSidebar('search')" title="Search">
-                <svg viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                </svg>
-            </div>
-            <div class="activitybar-item" onclick="toggleSidebar('git')" title="Source Control">
-                <svg viewBox="0 0 16 16" fill="currentColor">
-                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                </svg>
-            </div>
+            <div class="activity-icon" title="Extensions" onclick="switchSidebar('extensions')"><i
+                    class="fas fa-th-large"></i></div>
+            <div style="flex: 1;"></div>
+            <div class="activity-icon" title="Settings"><i class="fas fa-cog"></i></div>
         </div>
 
-        <!-- Left Sidebar -->
-        <div class="sidebar" id="leftSidebar">
-            <div class="sidebar-resizer" id="leftResizer"></div>
-            <div class="sidebar-header">
-                <span id="sidebarTitle">Chat</span>
-                <div class="workspace-selector" id="workspaceSelector" style="display: none;">
-                    <button class="workspace-btn active" onclick="switchWorkspace('SET-A')">SET-A</button>
-                    <button class="workspace-btn" onclick="switchWorkspace('SET-B')">SET-B</button>
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <div class="sidebar-title">
+                <span id="sidebar-title-text">Explorer</span>
+                <div class="sidebar-actions">
+                    <i class="fas fa-ellipsis-h action-btn"></i>
                 </div>
             </div>
-            <div class="sidebar-content" id="sidebarContent">
-                <!-- Chat View -->
-                <div id="chatView">
-                    <div id="chatBox" style="min-height: 100%;"></div>
-                </div>
-                <!-- File Explorer View -->
-                <div id="explorerView" style="display: none;">
-                    <div class="file-explorer" id="fileExplorer"></div>
-                </div>
-            </div>
-            <div class="chat-input-container" id="chatInputContainer">
-                <form id="chatForm">
-                    <input type="text" id="username" name="username" placeholder="Your Name" class="chat-input" style="margin-bottom: 4px;">
-                    <textarea id="msgInput" name="message" placeholder="Type a message..." class="chat-input" style="height: 60px; resize: none;"></textarea>
-                    <div style="display: flex; gap: 4px; margin-top: 4px;">
-                        <input type="file" name="file" id="fileInput" style="flex: 1; font-size: 11px; padding: 4px;">
-                        <button type="submit" class="chat-button">Send</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- Editor Area -->
-        <div class="editor-container">
-            <div class="editor-tabs" id="editorTabs">
-                <!-- Default live editor tab (cannot be closed) -->
-                <div class="editor-tab active" data-file="LIVE" id="liveTab" onclick="switchToLiveTab()">
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M9 1H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8h-1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5v1z"/>
-                        <path d="M14.5 0L11 .5V3h3V.5z"/>
-                    </svg>
-                    <span class="tab-name">Live Editor</span>
-                </div>
-            </div>
-            <div class="editor-content">
-                <textarea id="code" spellcheck="false" placeholder="Shared live editor. Type here and press Save to sync with everyone."></textarea>
-                <div id="noFileOpen" style="display: none; align-items: center; justify-content: center; height: 100%; color: var(--vscode-text-secondary); font-size: 14px;">
-                    No file open. Click a file in the explorer to open it.
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Sidebar (AI) -->
-        <div class="right-sidebar" id="rightSidebar">
-            <div class="right-sidebar-resizer" id="rightResizer"></div>
-            <div class="sidebar-header">AI Assistant</div>
-            <div id="aiChatMessages" class="sidebar-content">
-                <div class="ai-message assistant">
-                    <div style="font-weight: 600; margin-bottom: 4px; color: #4ec9b0;">AI Assistant</div>
-                    <div>👋 Hello! I'm your programming assistant. I can help you with:</div>
-                    <ul style="margin: 8px 0; padding-left: 20px;">
-                        <li>Writing and debugging code</li>
-                        <li>Code reviews and optimizations</li>
-                        <li>Explaining programming concepts</li>
-                        <li>Best practices and patterns</li>
-                    </ul>
-                    <div style="margin-top: 8px; font-size: 11px; color: var(--vscode-text-secondary);">
-                        💡 Tip: I can see your current code if you ask about it!
+            <!-- Explorer View -->
+            <div id="view-explorer" class="sidebar-view active">
+                <div
+                    style="padding: 0px 0px 10px 20px; font-weight: bold; font-size: 11px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>WORKSPACE</span>
+                    <div style="padding-right:10px;">
+                        <i class="fas fa-file-plus action-btn" title="New File" onclick="createNewFile()"></i>
+                        <i class="fas fa-folder-plus action-btn" title="New Folder" onclick="createNewFolder()"></i>
+                        <i class="fas fa-sync action-btn" title="Refresh" onclick="loadExplorer()"></i>
                     </div>
                 </div>
+                <div id="file-explorer" style="flex:1; overflow-y:auto;">
+                    <div style="padding: 10px; color: #aaa; text-align: center;">Loading...</div>
+                </div>
             </div>
-            <div class="chat-input-container">
-                <form id="aiChatForm">
-                    <input type="text" id="aiInput" class="chat-input" placeholder="Ask AI..." autocomplete="off">
-                    <button type="submit" class="chat-button" style="width: 100%; margin-top: 4px;">Send Message</button>
-                </form>
+
+            <!-- Search View -->
+            <div id="view-search" class="sidebar-view">
+                <div class="sidebar-input-container">
+                    <input type="text" class="sidebar-input" placeholder="Search"
+                        onkeyup="alert('Search logic to be implemented')">
+                </div>
+                <div style="padding: 10px; text-align: center; color: #777;">
+                    No results found.
+                </div>
+            </div>
+
+            <!-- Source Control View -->
+            <div id="view-scm" class="sidebar-view">
+                <div style="padding: 20px 10px; text-align: center;">
+                    <p style="margin-bottom: 10px;">No source control providers registered.</p>
+                </div>
+            </div>
+
+            <!-- Run View -->
+            <div id="view-run" class="sidebar-view">
+                <div style="padding: 10px;">
+                    <button
+                        style="width: 100%; background: #007acc; color: white; border: none; padding: 5px; cursor: pointer;"
+                        onclick="executeRun()">Run and Debug</button>
+                </div>
+            </div>
+
+            <!-- Extensions View -->
+            <div id="view-extensions" class="sidebar-view">
+                <div class="sidebar-input-container">
+                    <input type="text" class="sidebar-input" placeholder="Search Extensions in Marketplace">
+                </div>
+            </div>
+        </div>
+
+        <!-- Editor Groups -->
+        <div id="editor-groups">
+            <div id="tabs-container">
+                <div class="tab active">
+                    <i class="fab fa-php" style="color: #777bb3;"></i>
+                    <span>Welcome</span>
+                    <span class="tab-close" onclick="closeFile(event)"><i class="fas fa-times"></i></span>
+                </div>
+            </div>
+            <div id="monaco-editor-container"></div>
+
+            <!-- Panel -->
+            <div id="panel">
+                <div class="panel-header">
+                    <div class="panel-tab active">Terminal</div>
+                    <div class="panel-tab" onclick="alert('Output channel empty')">Output</div>
+                    <div class="panel-tab">Debug Console</div>
+                </div>
+                <div id="terminal-container"></div>
             </div>
         </div>
     </div>
 
-   <!-- Status Bar -->
-<div class="statusbar">
-    <div class="statusbar-left">
-        <div class="statusbar-item">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-            </svg>
-            <span>Ready</span>
+    <!-- Status Bar -->
+    <div id="statusbar">
+        <div style="display: flex;">
+            <div class="statusbar-item"><i class="fas fa-code-branch"></i> main*</div>
+            <div class="statusbar-item"><i class="far fa-times-circle"></i> 0</div>
+            <div class="statusbar-item"><i class="fas fa-exclamation-triangle"></i> 0</div>
         </div>
-        <div class="statusbar-item">
-            <span>Ln 1, Col 1</span>
-        </div>
-        <div class="statusbar-item">
-            <span>Spaces: 4</span>
+        <div style="display: flex;">
+            <div class="statusbar-item" id="status-cursor">Ln 1, Col 1</div>
+            <div class="statusbar-item">UTF-8</div>
+            <div class="statusbar-item" id="status-lang">PHP</div>
+            <div class="statusbar-item"><i class="fas fa-rss"></i> Go Live</div>
         </div>
     </div>
 
-    <!-- CENTER -->
-    <div class="statusbar-center">
-    © 2025 MCA Pro Portal | Developed by :
-    <a href="https://www.instagram.com/m_b.solanki203" 
-       target="_blank"
-       class="text-white font-semibold hover:text-indigo-400 transition">
-        @ m_b.solanki203
-    </a>
-    </div>
-
-    <div class="statusbar-right">
-        <div class="statusbar-item">
-            <span>UTF-8</span>
-        </div>
-        <div class="statusbar-item">
-            <span>PHP</span>
-        </div>
-    </div>
-</div>
-
+    <!-- Application Logic -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Postload Monaco -->
+    <script>var require = { paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } };</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.nls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.js"></script>
+    <!-- xterm.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.8.0/lib/addon-fit.min.js"></script>
 
     <script>
-        let currentWorkspace = 'SET-A';
-        let currentSidebar = 'chat';
-        let selectedFile = null;
-        let openFiles = {}; // { filePath: { name, content, modified } }
-        // Default active tab is the shared live editor
-        let activeTab = 'LIVE';
-        
-        // Custom Notification Function
-        function showNotify(msg, type='info') {
-            const toast = $("#toast");
-            toast.removeClass('bg-success bg-error bg-info').addClass('bg-'+type);
-            toast.text(msg).fadeIn().delay(3000).fadeOut();
+        // Global variables
+        var editor;
+        var term;
+        var currentFile = '';
+        var currentCwd = '<?php echo str_replace("\\", "/", getcwd()); ?>';
+        var editorFontSize = 14;
+        var minimapEnabled = true;
+        var wordWrapEnabled = false;
+
+        $(document).ready(function () {
+            initLayout();
+            initMonaco();
+            initTerminal();
+            loadExplorer();
+
+            // Menu Bindings
+            $('.menu-item').click(function (e) {
+                e.stopPropagation();
+                $('.dropdown').hide();
+                let menu = $(this).data('menu');
+                // Calculate position relative to the clicked item
+                let offset = $(this).offset();
+                $('#menu-' + menu).css({
+                    top: (offset.top + 30) + 'px',
+                    left: offset.left + 'px'
+                }).toggle();
+            });
+
+            $(document).click(function () {
+                $('.dropdown').hide();
+            });
+        });
+
+        function switchSidebar(viewName) {
+            // Update Activity Bar
+            $('.activity-icon').removeClass('active');
+            // Assuming order: explorer, search, scm, run, extensions
+            let index = 0;
+            let title = 'Explorer';
+            if (viewName === 'search') { index = 1; title = 'Search'; }
+            if (viewName === 'scm') { index = 2; title = 'Source Control'; }
+            if (viewName === 'run') { index = 3; title = 'Run and Debug'; }
+            if (viewName === 'extensions') { index = 4; title = 'Extensions'; }
+
+            $('.activity-icon').eq(index).addClass('active');
+
+            // Update Sidebar Content
+            $('.sidebar-view').removeClass('active');
+            $('#view-' + viewName).addClass('active');
+
+            // Update Title
+            $('#sidebar-title-text').text(title.toUpperCase());
         }
 
-        function loadMessages(){
-            $.get("fetch.php?workspace=" + currentWorkspace, d => {
-                $("#chatBox").html(d);
-                $("#chatBox").scrollTop($("#chatBox")[0].scrollHeight);
+        function initLayout() {
+            // Basic resizing logic can be added here
+        }
+
+        function initMonaco() {
+            require(['vs/editor/editor.main'], function () {
+                editor = monaco.editor.create(document.getElementById('monaco-editor-container'), {
+                    value: "<?php echo 'Welcome to Web Code Workspace\n\n// Create a new file or open one from the explorer'; ?>",
+                    language: 'php',
+                    theme: 'vs-dark',
+                    automaticLayout: true,
+                    minimap: { enabled: true },
+                    fontSize: editorFontSize,
+                    lineNumbers: 'on',
+                    scrollBeyondLastLine: false,
+                    roundedSelection: false,
+                });
+
+                // Add keybinding for Save
+                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, function () {
+                    saveFile();
+                });
+
+                editor.onDidChangeCursorPosition((e) => {
+                    $('#status-cursor').text('Ln ' + e.position.lineNumber + ', Col ' + e.position.column);
+                });
             });
         }
 
-        function loadFiles(){
-            $.get("get_files.php?workspace=" + currentWorkspace, function(files) {
-                const explorer = $("#fileExplorer");
-                explorer.empty();
-                
-                if (files.length === 0) {
-                    explorer.html('<div style="padding: 12px; color: var(--vscode-text-secondary); font-size: 12px;">No files uploaded yet</div>');
+        function initTerminal() {
+            term = new Terminal({
+                cursorBlink: true,
+                fontFamily: 'Consolas, monospace',
+                fontSize: 14,
+                theme: {
+                    background: '#1e1e1e'
+                }
+            });
+            const fitAddon = new FitAddon.FitAddon();
+            term.loadAddon(fitAddon);
+            term.open(document.getElementById('terminal-container'));
+            fitAddon.fit();
+
+            term.writeln('\x1b[1;34mWelcome to PHP Web Terminal\x1b[0m');
+            term.write('\r\n' + currentCwd + '> ');
+
+            // Resize listener
+            window.addEventListener('resize', () => fitAddon.fit());
+
+            // Handle Input
+            let currentLine = '';
+            term.onData(e => {
+                switch (e) {
+                    case '\r': // Enter
+                        term.write('\r\n');
+                        executeCommand(currentLine);
+                        currentLine = '';
+                        break;
+                    case '\u007F': // Backspace
+                        if (currentLine.length > 0) {
+                            term.write('\b \b');
+                            currentLine = currentLine.substring(0, currentLine.length - 1);
+                        }
+                        break;
+                    default:
+                        // Basic printable character check
+                        if (e >= ' ' && e <= '~') {
+                            currentLine += e;
+                            term.write(e);
+                        }
+                }
+            });
+        }
+
+        function executeCommand(cmd) {
+            if (!cmd.trim()) {
+                term.write(currentCwd + '> ');
+                return;
+            }
+
+            if (cmd.trim() === 'cls' || cmd.trim() === 'clear') {
+                term.clear();
+                term.write(currentCwd + '> ');
+                return;
+            }
+
+            // Call backend
+            $.ajax({
+                url: 'terminal.php',
+                method: 'POST',
+                data: JSON.stringify({ command: cmd, cwd: currentCwd }),
+                contentType: 'application/json',
+                success: function (res) {
+                    if (res.output) {
+                        // Fix line endings for xterm
+                        let out = res.output.replace(/\n/g, '\r\n');
+                        term.write(out);
+                    }
+                    if (res.cwd) {
+                        currentCwd = res.cwd;
+                    }
+                    term.write(currentCwd + '> ');
+                },
+                error: function (err) {
+                    term.write('\r\nError communicating with server.\r\n' + currentCwd + '> ');
+                }
+            });
+        }
+
+        function executeRun() {
+            if (currentFile && currentFile.endsWith('.php')) {
+                // Since this is web, running PHP technically means visiting the page or running generic CLI.
+                // Let's run CLI for now.
+                term.write('php ' + currentFile + '\r\n');
+                executeCommand('php ' + currentFile);
+            } else {
+                alert('Run is only supported for PHP files in this terminal context.');
+            }
+        }
+
+        function togglePanel() {
+            let p = $('#panel');
+            if (p.hasClass('hidden')) {
+                p.removeClass('hidden');
+                p.css('display', 'flex');
+            } else {
+                p.addClass('hidden');
+                p.css('display', 'none');
+            }
+        }
+
+        function toggleSidebar() {
+            let s = $('#sidebar');
+            if (s.css('display') === 'none') {
+                s.css('display', 'flex');
+            } else {
+                s.css('display', 'none');
+            }
+        }
+
+        function loadExplorer() {
+            $.get('file_manager.php', { action: 'list' }, function (data) {
+                $('#file-explorer').empty();
+                if (Array.isArray(data)) {
+                    renderTree(data, $('#file-explorer'));
+                } else {
+                    console.error("Invalid data received from explorer:", data);
+                    $('#file-explorer').html('<div style="color:red; margin:10px;">Error loading files</div>');
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error("Explorer Request Failed:", textStatus, errorThrown);
+                $('#file-explorer').html('<div style="color:red; margin:10px;">Connection Failed</div>');
+            });
+        }
+
+        function renderTree(nodes, container, level = 0) {
+            nodes.forEach(node => {
+                let padding = level * 15 + 20;
+                let item = $('<div class="explorer-item" style="padding-left:' + padding + 'px"></div>');
+
+                let iconClass = node.type === 'folder' ? 'fa-folder' : 'fa-file-code';
+                if (node.name.endsWith('.php')) iconClass = 'fa-php';
+                if (node.name.endsWith('.js')) iconClass = 'fa-js';
+                if (node.name.endsWith('.html')) iconClass = 'fa-html5';
+                if (node.name.endsWith('.css')) iconClass = 'fa-css3-alt';
+                if (node.name === 'terminal.php') iconClass = 'fa-terminal';
+
+                item.html('<i class="fas ' + iconClass + '"></i> ' + node.name);
+
+                // Add click handler
+                item.click(function (e) {
+                    e.stopPropagation();
+                    // Basic selection visual
+                    $('.explorer-item').css('background-color', '');
+                    $(this).css('background-color', '#37373d');
+
+                    if (node.type === 'file') {
+                        openFile(node.path);
+                    } else {
+                        // Toggle folder logic would go here
+                        // For now just expanding is not implemented in this simple recursor
+                    }
+                });
+
+                container.append(item);
+
+                if (node.type === 'folder' && node.children) {
+                    renderTree(node.children, container, level + 1);
+                }
+            });
+        }
+
+        function createNewFile() {
+            let name = prompt("Enter new file name (e.g. test.php):");
+            if (name) {
+                $.post('file_manager.php', { action: 'create_file', path: name }, function (res) {
+                    if (res.success) {
+                        loadExplorer();
+                        openFile(name);
+                    } else {
+                        alert(res.error);
+                    }
+                }, 'json');
+            }
+        }
+
+        function createNewFolder() {
+            let name = prompt("Enter new folder name:");
+            if (name) {
+                $.post('file_manager.php', { action: 'create_folder', path: name }, function (res) {
+                    if (res.success) {
+                        loadExplorer();
+                    } else {
+                        alert(res.error);
+                    }
+                }, 'json');
+            }
+        }
+
+        function openFile(path) {
+            currentFile = path;
+            // Update tabs
+            $('.tab span:first-child').next().text(path);
+            $('.window-title').text(path + ' - Web Code Workspace');
+
+            $.post('file_manager.php', { action: 'read', path: path }, function (res) {
+                if (res.error) {
+                    alert(res.error);
                     return;
                 }
-                
-                files.forEach(file => {
-                    const fileItem = $(`
-                        <div class="file-item" onclick="openFileInEditor('${file.path.replace(/'/g, "\\'")}', '${file.name.replace(/'/g, "\\'")}')">
-                            <svg class="file-icon" viewBox="0 0 16 16" fill="currentColor">
-                                <path d="M9 1H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8h-1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5v1z"/>
-                                <path d="M14.5 0L11 .5V3h3V.5z"/>
-                            </svg>
-                            <span class="file-name">${file.name}</span>
-                            <div class="file-actions" onclick="event.stopPropagation();">
-                                <div class="file-action-btn delete" onclick="deleteFile('${file.path.replace(/'/g, "\\'")}')" title="Delete file">
-                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm5 0A.5.5 0 0 1 11 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zM8 1.5a2.5 2.5 0 0 0-2.5 2.5v.5h-1a.5.5 0 0 0 0 1h1v7a2 2 0 0 0 2 2h3a2 2 0 0 0 2-2v-7h1a.5.5 0 0 0 0-1h-1V4A2.5 2.5 0 0 0 8 1.5zM6.5 4a1.5 1.5 0 0 1 3 0v.5h-3V4z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    `);
-                    explorer.append(fileItem);
-                });
+                if (editor) {
+                    let model = editor.getModel();
+                    // Map extension to language
+                    let ext = path.split('.').pop();
+                    let lang = 'plaintext';
+                    if (ext === 'php') lang = 'php';
+                    if (ext === 'js') lang = 'javascript';
+                    if (ext === 'html') lang = 'html';
+                    if (ext === 'css') lang = 'css';
+                    if (ext === 'json') lang = 'json';
+                    if (ext === 'md') lang = 'markdown';
+
+                    monaco.editor.setModelLanguage(model, lang);
+                    editor.setValue(res.content);
+                    $('#status-lang').text(lang.toUpperCase());
+                }
             }, 'json');
         }
 
-        function openFileInEditor(filePath, fileName) {
-            // If file is already open, just switch to it
-            if (openFiles[filePath]) {
-                switchToTab(filePath);
-                return;
-            }
-            
-            // Load file content
-            $.get("file_operations.php?action=read&file=" + encodeURIComponent(filePath), function(response) {
-                if (response.error) {
-                    showNotify("❌ " + response.error, "error");
-                    return;
-                }
-                
-                // Add to open files
-                openFiles[filePath] = {
-                    name: fileName,
-                    content: response.content,
-                    modified: false
-                };
-                
-                // Create tab
-                createTab(filePath, fileName);
-                
-                // Switch to this tab
-                switchToTab(filePath);
-                
-                // Load content into editor
-                $("#code").val(response.content);
-                updateCursorPosition();
-            }, 'json').fail(function() {
-                showNotify("❌ Failed to load file", "error");
-            });
-        }
+        function saveFile() {
+            if (!editor || !currentFile) return;
+            let content = editor.getValue();
 
-        function createTab(filePath, fileName) {
-            const tab = $(`
-                <div class="editor-tab" data-file="${filePath.replace(/"/g, '&quot;')}">
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M9 1H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8h-1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5v1z"/>
-                        <path d="M14.5 0L11 .5V3h3V.5z"/>
-                    </svg>
-                    <span class="tab-name">${fileName}</span>
-                    <span class="tab-close" onclick="event.stopPropagation(); closeTab('${filePath.replace(/'/g, "\\'")}')">&times;</span>
-                </div>
-            `);
-            
-            tab.on('click', function(e) {
-                if (!$(e.target).hasClass('tab-close')) {
-                    switchToTab(filePath);
-                }
-            });
-            
-            $("#editorTabs").append(tab);
-        }
+            // Visual feedback
+            $('.tab').css('border-top-color', '#eebb00'); // saving color
 
-        function switchToTab(filePath) {
-            // Save current file content if modified
-            if (activeTab && openFiles[activeTab] && openFiles[activeTab].modified) {
-                openFiles[activeTab].content = $("#code").val();
-            }
-            
-            // Update active tab
-            $(".editor-tab").removeClass("active");
-            const tab = $(`.editor-tab[data-file="${filePath.replace(/"/g, '&quot;')}"]`);
-            if (tab.length === 0) return; // Tab doesn't exist
-            tab.addClass("active");
-            
-            activeTab = filePath;
-            
-            // Load file content
-            if (openFiles[filePath]) {
-                $("#code").val(openFiles[filePath].content);
-                $("#code").show();
-                $("#noFileOpen").hide();
-                
-                // Update file name in status bar
-                updateStatusBar(openFiles[filePath].name);
-                updateCursorPosition();
-            }
-        }
-
-        function closeTab(filePath) {
-            // Check if file is modified
-            if (openFiles[filePath] && openFiles[filePath].modified) {
-                if (!confirm("File has unsaved changes. Close anyway?")) {
-                    return;
-                }
-            }
-            
-            // Remove tab
-            $(`.editor-tab[data-file="${filePath.replace(/"/g, '&quot;')}"]`).remove();
-            
-            // Remove from open files
-            delete openFiles[filePath];
-            
-            // If this was the active tab, switch to another
-            if (activeTab === filePath) {
-                const remainingTabs = Object.keys(openFiles);
-                if (remainingTabs.length > 0) {
-                    switchToTab(remainingTabs[remainingTabs.length - 1]);
+            $.post('file_manager.php', { action: 'write', path: currentFile, content: content }, function (res) {
+                if (res.success) {
+                    // Success feedback
+                    $('.tab').css('border-top-color', '#007acc');
                 } else {
-                    // No files open
-                    activeTab = null;
-                    $("#code").hide();
-                    $("#noFileOpen").show();
-                    $("#code").val("");
-                    updateStatusBar("");
+                    alert('Error saving: ' + res.error);
+                    $('.tab').css('border-top-color', 'red');
                 }
+            }, 'json');
+        }
+
+        function closeFile(e) {
+            if (e) e.stopPropagation();
+            if (editor) {
+                editor.setValue('');
+                currentFile = '';
+                $('.tab span:first-child').next().text('No File');
+                $('.window-title').text('Web Code Workspace');
             }
         }
 
-        function deleteFile(filePath) {
-            if (!confirm("Are you sure you want to delete this file? This action cannot be undone.")) {
-                return;
+        /* Menu Actions */
+        function triggerEdit(action) {
+            if (!editor) return;
+            editor.focus();
+            if (action === 'undo') editor.trigger('menu', 'undo');
+            if (action === 'redo') editor.trigger('menu', 'redo');
+            if (action === 'cut') {
+                alert('For Cut/Copy/Paste, please use keyboard shortcuts (Ctrl+X/C/V) due to browser security.');
             }
-
-            const pwd = prompt("Enter password to delete this file:");
-            if (pwd !== '203') {
-                showNotify("❌ Incorrect password", "error");
-                return;
-            }
-            
-            // Close tab first if open
-            if (openFiles[filePath]) {
-                closeTab(filePath);
-            }
-            
-            $.post("file_operations.php", {
-                action: 'delete',
-                file: filePath,
-                workspace: currentWorkspace
-            }, function(response) {
-                if (response.error) {
-                    showNotify("❌ " + response.error, "error");
-                } else {
-                    showNotify("✅ File deleted successfully", "success");
-                    
-                    // Reload file list
-                    loadFiles();
-                }
-            }, 'json').fail(function() {
-                showNotify("❌ Failed to delete file", "error");
-            });
+            if (action === 'copy') alert('Use Ctrl+C');
+            if (action === 'paste') alert('Use Ctrl+V');
+            if (action === 'find') editor.trigger('menu', 'actions.find');
+            if (action === 'replace') editor.trigger('menu', 'editor.action.startFindReplaceAction');
+            if (action === 'comment') editor.trigger('menu', 'editor.action.commentLine');
+            if (action === 'format') editor.trigger('menu', 'editor.action.formatDocument');
         }
 
-        function switchWorkspace(workspace) {
-            // Close all open file tabs (but keep LIVE editor)
-            const openFilePaths = Object.keys(openFiles);
-            openFilePaths.forEach(filePath => {
-                closeTab(filePath);
-            });
-            
-            currentWorkspace = workspace;
-            $(".workspace-btn").removeClass("active");
-            $(`.workspace-btn:contains('${workspace}')`).addClass("active");
-            loadMessages();
-            loadFiles();
-            showNotify(`Switched to ${workspace}`, "info");
+        function triggerSelection(action) {
+            if (!editor) return;
+            editor.focus();
+            if (action === 'all') editor.trigger('menu', 'editor.action.selectAll');
+            if (action === 'expand') editor.trigger('menu', 'editor.action.smartSelect.expand');
         }
 
-        function toggleSidebar(type) {
-            currentSidebar = type;
-            $(".activitybar-item").removeClass("active");
-            event.currentTarget.classList.add("active");
-            
-            if (type === 'chat') {
-                $("#sidebarTitle").text("Chat");
-                $("#workspaceSelector").show();
-                $("#chatView").show();
-                $("#explorerView").hide();
-                $("#chatInputContainer").show();
-                $("#fileMessageView").hide();
-            } else if (type === 'explorer') {
-                $("#sidebarTitle").text("Explorer");
-                $("#workspaceSelector").show();
-                $("#chatView").hide();
-                $("#explorerView").show();
-                $("#chatInputContainer").hide();
-                loadFiles();
-            } else {
-                $("#sidebarTitle").text(type.charAt(0).toUpperCase() + type.slice(1));
-                $("#workspaceSelector").hide();
-                $("#chatView").hide();
-                $("#explorerView").hide();
-                $("#chatInputContainer").hide();
+        function triggerView(action) {
+            if (action === 'minimap') {
+                minimapEnabled = !minimapEnabled;
+                editor.updateOptions({ minimap: { enabled: minimapEnabled } });
             }
-        }
-        
-        function updateStatusBar(fileName) {
-            if (fileName) {
-                $(".statusbar-item:contains('PHP')").html(fileName.split('.').pop().toUpperCase() || 'TEXT');
-            } else {
-                $(".statusbar-item:contains('PHP')").html('LIVE');
+            if (action === 'wordwrap') {
+                wordWrapEnabled = !wordWrapEnabled;
+                editor.updateOptions({ wordWrap: wordWrapEnabled ? 'on' : 'off' });
             }
-        }
-        
-        // Track file modifications
-        $("#code").on("input", function() {
-            if (activeTab && openFiles[activeTab]) {
-                openFiles[activeTab].modified = true;
-                const tab = $(`.editor-tab[data-file="${activeTab.replace(/"/g, '&quot;')}"]`);
-                const tabName = tab.find(".tab-name");
-                if (!tabName.text().includes("*")) {
-                    tabName.text(openFiles[activeTab].name + " *");
-                }
+            if (action === 'zoomin') {
+                editorFontSize += 1;
+                editor.updateOptions({ fontSize: editorFontSize });
             }
-        });
-        
-        // Update tab name when file is saved
-        function updateTabName(filePath) {
-            if (openFiles[filePath]) {
-                const tab = $(`.editor-tab[data-file="${filePath.replace(/"/g, '&quot;')}"]`);
-                tab.find(".tab-name").text(openFiles[filePath].name);
+            if (action === 'zoomout') {
+                editorFontSize = Math.max(10, editorFontSize - 1);
+                editor.updateOptions({ fontSize: editorFontSize });
+            }
+            if (action === 'zoomreset') {
+                editorFontSize = 14;
+                editor.updateOptions({ fontSize: editorFontSize });
             }
         }
 
-        // Save current file or live editor
-        function saveCode(){
-            if (!activeTab) {
-                showNotify("⚠️ No file open to save!", "error");
-                return;
-            }
-            
-            const content = $("#code").val();
-
-            // Live shared editor
-            if (activeTab === 'LIVE') {
-                $.post("save_code.php", { code: content }, function() {
-                    showNotify("✅ Live editor synced for everyone!", "success");
-                }).fail(function() {
-                    showNotify("❌ Failed to save live editor", "error");
-                });
-                return;
-            }
-            
-            // Workspace file
-            const filePath = activeTab;
-            
-            $.post("file_operations.php", {
-                action: 'save',
-                file: filePath,
-                content: content,
-                workspace: currentWorkspace
-            }, function(response) {
-                if (response.error) {
-                    showNotify("❌ " + response.error, "error");
-                } else {
-                    showNotify("✅ File saved successfully!", "success");
-                    if (openFiles[filePath]) {
-                        openFiles[filePath].modified = false;
-                        openFiles[filePath].content = content;
-                        updateTabName(filePath);
-                    }
-                }
-            }, 'json').fail(function() {
-                showNotify("❌ Failed to save file", "error");
-            });
+        function triggerGo(action) {
+            if (!editor) return;
+            editor.focus();
+            if (action === 'line') editor.trigger('menu', 'editor.action.gotoLine');
+            if (action === 'file') alert('Quick Open (Ctrl+P) - File picker not yet implemented');
         }
 
-        // Live editor auto-refresh (for other users' saves)
-        function refreshCode(){
-            if (activeTab !== 'LIVE') return;
-            if ($("#code").is(":focus")) return;
-
-            $.get("save_code.php", function(d) {
-                $("#code").val(d);
-                updateCursorPosition();
-            });
+        function triggerHelp() {
+            alert('VS Code Web Clone\n\nA lightweight PHP-based cloud IDE mimicking Visual Studio Code.\n\nVersion 1.0.0');
         }
-
-        function copyCode(){
-            navigator.clipboard.writeText($("#code").val());
-            showNotify("📋 Code copied to clipboard", "info");
-        }
-
-        function deleteMsg(id){
-            if(confirm("Confirm deletion of this record?")){
-                $.get("delete.php?id="+id, () => {
-                    loadMessages();
-                    loadFiles();
-                    showNotify("🗑️ Message removed", "info");
-                });
-            }
-        }
-
-        // Chat Validation
-        $("#chatForm").submit(function(e){
-            e.preventDefault();
-            let name = $("#username").val().trim();
-            let msg = $("#msgInput").val().trim();
-            let file = $("#fileInput").val();
-
-            if(name == ""){
-                showNotify("❌ Please enter your name", "error");
-                return;
-            }
-            if(msg == "" && file == ""){
-                showNotify("❌ Message or File is required", "error");
-                return;
-            }
-
-            let formData = new FormData(this);
-            formData.append('workspace', currentWorkspace);
-
-            $.ajax({
-                url: "send.php",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: () => { 
-                    this.reset(); 
-                    loadMessages(); 
-                    loadFiles();
-                    showNotify("📩 Message Sent", "success");
-                }
-            });
-        });
-
-
-        // Resizable Sidebars
-        function makeResizable(resizer, sidebar, isLeft) {
-            let isResizing = false;
-            
-            resizer.addEventListener('mousedown', (e) => {
-                isResizing = true;
-                resizer.classList.add('resizing');
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', stopResize);
-            });
-
-            function handleMouseMove(e) {
-                if (!isResizing) return;
-                
-                const rect = sidebar.getBoundingClientRect();
-                let newWidth;
-                
-                if (isLeft) {
-                    newWidth = e.clientX - rect.left;
-                } else {
-                    newWidth = rect.right - e.clientX;
-                }
-                
-                // Min and max widths
-                newWidth = Math.max(200, Math.min(600, newWidth));
-                sidebar.style.width = newWidth + 'px';
-            }
-
-            function stopResize() {
-                isResizing = false;
-                resizer.classList.remove('resizing');
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', stopResize);
-            }
-        }
-
-        // Initialize resizers
-        makeResizable(document.getElementById('leftResizer'), document.getElementById('leftSidebar'), true);
-        makeResizable(document.getElementById('rightResizer'), document.getElementById('rightSidebar'), false);
-
-        // AI Chat Functions
-        function formatCodeBlocks(text) {
-            marked.setOptions({
-                highlight: function(code, lang) {
-                    if (lang && hljs.getLanguage(lang)) {
-                        try {
-                            return hljs.highlight(code, { language: lang }).value;
-                        } catch (err) {}
-                    }
-                    return hljs.highlightAuto(code).value;
-                },
-                breaks: true
-            });
-            
-            let html = marked.parse(text);
-            
-            html = html.replace(/<pre><code class="language-(\w+)">/g, function(match, lang) {
-                return `<div class="relative group"><button onclick="copyCodeBlock(this)" class="absolute top-2 right-2 bg-slate-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">Copy</button><pre><code class="language-${lang}">`;
-            });
-            
-            return html;
-        }
-        
-        function copyCodeBlock(button) {
-            const codeBlock = button.nextElementSibling;
-            const text = codeBlock.textContent || codeBlock.innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                button.textContent = 'Copied!';
-                setTimeout(() => {
-                    button.textContent = 'Copy';
-                }, 2000);
-            });
-        }
-        
-        window.copyCodeBlock = copyCodeBlock;
-        
-        function insertCodeIntoEditor(code) {
-            const codeEditor = document.getElementById('code');
-            const cursorPos = codeEditor.selectionStart;
-            const textBefore = codeEditor.value.substring(0, cursorPos);
-            const textAfter = codeEditor.value.substring(cursorPos);
-            
-            codeEditor.value = textBefore + code + textAfter;
-            codeEditor.focus();
-            codeEditor.setSelectionRange(cursorPos + code.length, cursorPos + code.length);
-            codeEditor.dispatchEvent(new Event('input', { bubbles: true }));
-            
-            showNotify("✅ Code inserted into editor", "success");
-        }
-
-        window.insertCodeIntoEditor = insertCodeIntoEditor;
-
-        $("#aiChatForm").submit(function(e) {
-            e.preventDefault();
-            let msg = $("#aiInput").val().trim();
-            if (msg === "") return;
-
-            let currentCode = $("#code").val();
-
-            // Add user message
-            $("#aiChatMessages").append(`
-                <div class="ai-message user">
-                    <div style="font-weight: 600; margin-bottom: 4px;">You</div>
-                    <div>${$('<div>').text(msg).html()}</div>
-                </div>
-            `);
-            
-            $("#aiInput").val("");
-            $("#aiChatMessages").scrollTop($("#aiChatMessages")[0].scrollHeight);
-
-            // Add loading indicator
-            let loadingId = 'loading-' + Date.now();
-            $("#aiChatMessages").append(`
-                <div id="${loadingId}" class="ai-message assistant">
-                    <div style="font-style: italic; opacity: 0.7;">
-                        <span class="inline-block animate-pulse">💭 Analyzing your code...</span>
-                    </div>
-                </div>
-            `);
-            $("#aiChatMessages").scrollTop($("#aiChatMessages")[0].scrollHeight);
-
-            // Call API
-            $.ajax({
-                url: "ai_chat.php",
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({ 
-                    message: msg,
-                    currentCode: currentCode
-                }),
-                success: function(response) {
-                    $(`#${loadingId}`).remove();
-                    
-                    let reply = "Sorry, I couldn't get a response.";
-                    if (response.error) {
-                        if (typeof response.error === 'object' && response.error.message) {
-                            reply = "Error: " + response.error.message;
-                        } else {
-                            reply = "Error: " + response.error;
-                        }
-                    } else if (Array.isArray(response) && response.length > 0 && response[0].generated_text) {
-                        reply = response[0].generated_text;
-                    } else if (response.candidates && response.candidates.length > 0) {
-                        reply = response.candidates[0].content.parts[0].text;
-                    } else if (response.choices && response.choices.length > 0) {
-                        reply = response.choices[0].message.content;
-                    }
-
-                    let formattedReply = formatCodeBlocks(reply);
-                    
-                    let codeBlocks = [];
-                    const codeBlockRegex = /```[\s\S]*?```/g;
-                    let match;
-                    while ((match = codeBlockRegex.exec(reply)) !== null) {
-                        let code = match[0].replace(/```\w*\n?/g, '').replace(/```/g, '').trim();
-                        if (code.length > 0) {
-                            codeBlocks.push(code);
-                        }
-                    }
-
-                    let messageId = 'msg-' + Date.now();
-                    let messageHtml = `
-                        <div id="${messageId}" class="ai-message assistant">
-                            <div style="font-weight: 600; margin-bottom: 4px; color: #4ec9b0;">AI Assistant</div>
-                            <div class="prose prose-sm max-w-none" style="color: var(--vscode-text);">
-                                ${formattedReply}
-                            </div>
-                        </div>
-                    `;
-                    
-                    $("#aiChatMessages").append(messageHtml);
-                    
-                    if (codeBlocks.length > 0) {
-                        codeBlocks.forEach((code, index) => {
-                            let buttonId = 'insert-btn-' + messageId + '-' + index;
-                            let buttonHtml = `
-                                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--vscode-border);">
-                                    <button id="${buttonId}" 
-                                            class="chat-button" style="width: 100%;">
-                                        📋 Insert Code into Editor
-                                    </button>
-                                </div>
-                            `;
-                            $(`#${messageId}`).append(buttonHtml);
-                            
-                            $(`#${buttonId}`).on('click', function() {
-                                insertCodeIntoEditor(code);
-                            });
-                        });
-                    }
-                    
-                    $(`#${messageId} pre code`).each(function() {
-                        hljs.highlightElement(this);
-                    });
-                    
-                    $("#aiChatMessages").scrollTop($("#aiChatMessages")[0].scrollHeight);
-                },
-                error: function() {
-                    $(`#${loadingId}`).remove();
-                    showNotify("❌ Failed to contact AI", "error");
-                }
-            });
-        });
-
-        // Update cursor position in status bar
-        function updateCursorPosition() {
-            const el = $("#code")[0];
-            if (!el) return;
-            const text = $("#code").val();
-            const cursorPos = el.selectionStart || 0;
-            const textBeforeCursor = text.substring(0, cursorPos);
-            const lines = textBeforeCursor.split('\n');
-            const line = lines.length;
-            const col = lines[lines.length - 1].length + 1;
-            $(".statusbar-item:contains('Ln')").html(`Ln ${line}, Col ${col}`);
-        }
-        
-        $("#code").on("input keyup click", function() {
-            updateCursorPosition();
-        });
-
-        // Keyboard shortcuts
-        $(document).on("keydown", function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                saveCode();
-            }
-        });
-
-        // Switch to live editor tab and load shared content
-        function switchToLiveTab() {
-            // Save current file content if modified
-            if (activeTab && activeTab !== 'LIVE' && openFiles[activeTab] && openFiles[activeTab].modified) {
-                openFiles[activeTab].content = $("#code").val();
-            }
-
-            $(".editor-tab").removeClass("active");
-            $("#liveTab").addClass("active");
-            activeTab = 'LIVE';
-
-            $.get("save_code.php", function(d) {
-                $("#code").val(d);
-                $("#code").show();
-                $("#noFileOpen").hide();
-                updateStatusBar('LIVE');
-                updateCursorPosition();
-            });
-        }
-
-        // Initialize
-        setInterval(loadMessages, 3000);
-        setInterval(loadFiles, 5000);
-        setInterval(refreshCode, 4000);
-        loadMessages();
-        loadFiles();
-        switchToLiveTab();
-        
-        // Make deleteFile available globally
-        window.deleteFile = deleteFile;
     </script>
+
+    <!-- AI Assistant Panel -->
+    <div id="ai-panel">
+        <div class="ai-header">
+            <h3><i class="fas fa-robot"></i> AI Assistant (Ctrl+I)</h3>
+            <span class="ai-close" onclick="toggleAIPanel()"><i class="fas fa-times"></i></span>
+        </div>
+        <div class="ai-content">
+            <div class="ai-messages" id="ai-messages">
+                <div style="padding: 20px; text-align: center; color: #777;">
+                    <i class="fas fa-robot" style="font-size: 48px; margin-bottom: 10px;"></i>
+                    <p>Ask me anything about your code!</p>
+                    <p style="font-size: 11px;">I can help with debugging, explanations, and suggestions.</p>
+                </div>
+            </div>
+            <div class="ai-input-area">
+                <textarea id="ai-input" class="ai-input" placeholder="Ask a question about your code..."></textarea>
+                <button class="ai-send-btn" onclick="sendAIQuery()" id="ai-send-btn">Send</button>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>

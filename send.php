@@ -3,12 +3,10 @@ require_once __DIR__ . "/db.php";
 
 $username = $_POST['username'] ?? '';
 $message  = $_POST['message'] ?? '';
-$workspace = $_POST['workspace'] ?? 'SET-A';
 $filePath = '';
 
 $username = mysqli_real_escape_string($conn, $username);
 $message  = mysqli_real_escape_string($conn, $message);
-$workspace = mysqli_real_escape_string($conn, $workspace);
 
 /* FILE UPLOAD (OPTIONAL) */
 if (!empty($_FILES['file']) && $_FILES['file']['error'] === 0) {
@@ -43,10 +41,10 @@ if (!empty($_FILES['file']) && $_FILES['file']['error'] === 0) {
 /* DO NOT INSERT EMPTY ROWS */
 if ($username !== '' || $message !== '' || $filePath !== '') {
 
-    $stmt = $conn->prepare(
-        "INSERT INTO messages (username, message, file_path, workspace) VALUES (?, ?, ?, ?)"
+$stmt = $conn->prepare(
+        "INSERT INTO messages (username, message, file_path) VALUES (?, ?, ?)"
     );
-    $stmt->bind_param("ssss", $username, $message, $filePath, $workspace);
+    $stmt->bind_param("sss", $username, $message, $filePath);
     $stmt->execute();
 }
 
