@@ -832,27 +832,42 @@
             loadExplorer();
 
             // Menu Bindings
-            $('.menu-item').click(function (e) {
+            // Menu Bindings - Improved
+            $('.menu-item').on('click', function (e) {
+                e.preventDefault();
                 e.stopPropagation();
-                $('.dropdown').hide();
+
+                // Hide other dropdowns first
+                $('.dropdown').not($(this).next('.dropdown')).hide();
+
                 let menu = $(this).data('menu');
-                // Calculate position relative to the clicked item
                 let offset = $(this).offset();
-                $('#menu-' + menu).css({
-                    top: (offset.top + 30) + 'px',
-                    left: offset.left + 'px'
-                }).toggle();
+                let $dropdown = $('#menu-' + menu);
+
+                if ($dropdown.is(':visible')) {
+                    $dropdown.hide();
+                } else {
+                    // Position and show
+                    $dropdown.css({
+                        top: (offset.top + 28) + 'px',
+                        left: offset.left + 'px',
+                        display: 'block',
+                        zIndex: 10001
+                    });
+                }
             });
 
-            $(document).click(function () {
-                $('.dropdown').hide();
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.menu-item').length && !$(e.target).closest('.dropdown').length) {
+                    $('.dropdown').hide();
+                }
                 $('#context-menu').hide();
             });
 
             // Global keyboard shortcuts
             $(document).keydown(function (e) {
-                // Ctrl+I for AI Assistant
-                if (e.ctrlKey && e.key === 'i') {
+                // Ctrl+0 for AI Assistant
+                if (e.ctrlKey && e.key === '0') {
                     e.preventDefault();
                     toggleAIPanel();
                     return false;
@@ -1339,7 +1354,21 @@
             $('#context-menu').hide();
             if (!contextMenuNode) return;
 
+            // Determine target path
+            let targetPath = contextMenuNode.path;
+            if (contextMenuNode.type === 'file') {
+                // If it's a file, get its directory
+                targetPath = targetPath.substring(0, targetPath.lastIndexOf('/'));
+            }
+            if (!targetPath) targetPath = '';
+
             switch (action) {
+                case 'new-file':
+                    createNewFile(targetPath);
+                    break;
+                case 'new-folder':
+                    createNewFolder(targetPath);
+                    break;
                 case 'open':
                     if (contextMenuNode.type === 'file') {
                         openFile(contextMenuNode.path);
@@ -1353,10 +1382,43 @@
                     break;
                 case 'copy-path':
                     navigator.clipboard.writeText(contextMenuNode.path);
-                    alert('Path copied: ' + contextMenuNode.path);
                     break;
             }
             contextMenuNode = null;
+        }
+
+        function createNewFile(basePath = '') {
+            let fileName = prompt("Enter file name:");
+            if (fileName) {
+                let fullPath = basePath ? basePath + '/' + fileName : fileName;
+                // Handle duplicate slashes
+                fullPath = fullPath.replace('//', '/');
+
+                $.post('file_manager.php', { action: 'create', file: fullPath }, function (res) {
+                    if (res.success) {
+                        loadExplorer();
+                        openFile(fullPath);
+                    } else {
+                        alert('Error creating file: ' + res.error);
+                    }
+                }, 'json');
+            }
+        }
+
+        function createNewFolder(basePath = '') {
+            let folderName = prompt("Enter folder name:");
+            if (folderName) {
+                let fullPath = basePath ? basePath + '/' + folderName : folderName;
+                fullPath = fullPath.replace('//', '/');
+
+                $.post('file_manager.php', { action: 'create_folder', folder: fullPath }, function (res) {
+                    if (res.success) {
+                        loadExplorer();
+                    } else {
+                        alert('Error creating folder: ' + res.error);
+                    }
+                }, 'json');
+            }
         }
 
         function renameItem(node) {
@@ -1433,7 +1495,7 @@
     <!-- AI Assistant Panel -->
     <div id="ai-panel">
         <div class="ai-header">
-            <h3><i class="fas fa-robot"></i> AI Assistant (Ctrl+I)</h3>
+            <h3><i class="fas fa-robot"></i> AI Assistant (Ctrl+0)</h3>
             <span class="ai-close" onclick="toggleAIPanel()"><i class="fas fa-times"></i></span>
         </div>
         <div class="ai-content">
