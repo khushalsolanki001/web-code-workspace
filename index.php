@@ -557,11 +557,74 @@
 
         #terminal-container {
             flex: 1;
-            padding: 8px;
+            padding: 12px;
             overflow: hidden;
             background: #0c0c0c;
             border-radius: var(--vscode-border-radius);
             margin: 4px;
+            border: 1px solid var(--vscode-border);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        #terminal-container::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: var(--vscode-text-secondary);
+            font-size: 10px;
+            font-family: var(--vscode-mono-font);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 2px 6px;
+            border-radius: 3px;
+            opacity: 0.7;
+            transition: var(--vscode-transition);
+        }
+
+        #terminal-container.active::before {
+            content: '● RUNNING';
+            color: var(--vscode-success);
+            opacity: 1;
+        }
+
+        #terminal-container.error::before {
+            content: '⚠ ERROR';
+            color: var(--vscode-error);
+            opacity: 1;
+        }
+
+        /* Terminal scrollbar styling */
+        .xterm {
+            height: 100% !important;
+            font-family: var(--vscode-mono-font) !important;
+            font-size: 13px !important;
+            line-height: 1.4 !important;
+        }
+
+        .xterm-viewport {
+            background: transparent !important;
+        }
+
+        .xterm-screen {
+            background: transparent !important;
+            color: #0f0f0f !important;
+        }
+
+        .xterm-rows {
+            padding: 8px !important;
+        }
+
+        .xterm-cursor {
+            background: #0f0f0f !important;
+            color: #0f0f0f !important;
+            border: 1px solid #ffffff !important;
+            animation: terminalCursor 1s infinite !important;
+        }
+
+        @keyframes terminalCursor {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
 
         /* Status Bar */
@@ -1975,83 +2038,299 @@
         }
 
         function initTerminal() {
+            const terminalContainer = document.getElementById('terminal-container');
+            terminalContainer.classList.add('active');
+            
             term = new Terminal({
                 cursorBlink: true,
-                fontFamily: 'Consolas, monospace',
-                fontSize: 14,
+                cursorStyle: 'block',
+                fontFamily: var(--vscode-mono-font),
+                fontSize: 13,
+                fontWeight: '400',
+                lineHeight: 1.4,
+                letterSpacing: 0,
                 theme: {
-                    background: '#1e1e1e'
-                }
+                    background: 'transparent',
+                    foreground: '#0f0f0f',
+                    cursor: '#ffffff',
+                    cursorAccent: '#000000',
+                    selection: 'rgba(255, 255, 255, 0.3)',
+                    black: '#000000',
+                    red: '#ff5555',
+                    green: '#50fa7b',
+                    yellow: '#f1fa8c',
+                    blue: '#57c7ff',
+                    magenta: '#ff79c6',
+                    cyan: '#8be9fd',
+                    white: '#bfbfbf',
+                    brightBlack: '#4d4d4d',
+                    brightRed: '#ff6e6e',
+                    brightGreen: '#69ff94',
+                    brightYellow: '#ffffa5',
+                    brightBlue: '#d6acff',
+                    brightMagenta: '#ff92df',
+                    brightCyan: '#a4ffff',
+                    brightWhite: '#ffffff'
+                },
+                allowTransparency: true,
+                scrollback: 1000,
+                cols: 80,
+                rows: 24
             });
+
+            // Load add-ons
             const fitAddon = new FitAddon.FitAddon();
+            const webLinksAddon = new WebLinksAddon.WebLinksAddon();
+            const searchAddon = new SearchAddon.SearchAddon();
+            
             term.loadAddon(fitAddon);
-            term.open(document.getElementById('terminal-container'));
+            term.loadAddon(webLinksAddon);
+            term.loadAddon(searchAddon);
+            
+            term.open(terminalContainer);
             fitAddon.fit();
 
-            term.writeln('\x1b[1;34mWelcome to PHP Web Terminal\x1b[0m');
-            term.write('\r\n' + currentCwd + '> ');
+            // Welcome message
+            term.writeln('');
+            term.writeln('\x1b[38;5;208m┌──────────────────────────────────────────────┐\x1b[0m');
+            term.writeln('\x1b[38;5;208m│                                              │\x1b[0m');
+            term.writeln('\x1b[38;5;208m│  \x1b[38;5;40mPHP WEB TERMINAL\x1b[0m\x1b[38;5;208m                 │\x1b[0m');
+            term.writeln('\x1b[38;5;208m│  \x1b[38;5;46m● Ready\x1b[0m\x1b[38;5;208m                    │\x1b[0m');
+            term.writeln('\x1b[38;5;208m│  \x1b[38;5;40mhelp\x1b[0m\x1b[38;5;208m                     \x1b[38;5;40mls\x1b[0m\x1b[38;5;208m                     \x1b[38;5;40mcd\x1b[0m\x1b[38;5;208m                     \x1b[38;5;40mphp\x1b[0m\x1b[38;5;208m                     │\x1b[0m');
+            term.writeln('\x1b[38;5;208m└──────────────────────────────────────────────┘\x1b[0m');
+            term.writeln('');
+
+            // Show current working directory
+            const cwdDisplay = currentCwd.length > 25 ? '../' + basename(currentCwd) : currentCwd;
+            term.write('\x1b[38;5;34m' + cwdDisplay + '\x1b[0m\x1b[38;5;46m$ \x1b[0m');
 
             // Resize listener
             window.addEventListener('resize', () => fitAddon.fit());
 
+            // Terminal command history
+            let commandHistory = [];
+            let historyIndex = -1;
+            
             // Handle Input
             let currentLine = '';
             term.onData(e => {
+                // Update terminal status
+                const container = document.getElementById('terminal-container');
+                container.classList.remove('error');
+                container.classList.add('active');
+                
                 switch (e) {
                     case '\r': // Enter
                         term.write('\r\n');
+                        
+                        // Add to history
+                        if (currentLine.trim()) {
+                            commandHistory.push(currentLine.trim());
+                            if (commandHistory.length > 50) {
+                                commandHistory.shift();
+                            }
+                            historyIndex = -1;
+                        }
+                        
                         executeCommand(currentLine);
                         currentLine = '';
                         break;
+                        
                     case '\u007F': // Backspace
                         if (currentLine.length > 0) {
-                            term.write('\b \b');
                             currentLine = currentLine.substring(0, currentLine.length - 1);
+                            term.write('\b \b');
                         }
                         break;
+                        
+                    case '\u001B': // Arrow keys
+                        // Handle arrow up/down for history
+                        return; // Let arrow keys be handled separately
+                        
                     default:
                         // Basic printable character check
                         if (e >= ' ' && e <= '~') {
                             currentLine += e;
                             term.write(e);
+                            historyIndex = -1; // Reset history index when typing
                         }
+                }
+            });
+
+            // Add keyboard support for history navigation
+            document.addEventListener('keydown', function(e) {
+                if (document.activeElement !== term.textarea) return;
+                
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (historyIndex === -1) {
+                        historyIndex = commandHistory.length - 1;
+                    } else if (historyIndex > 0) {
+                        historyIndex--;
+                    }
+                    
+                    if (historyIndex >= 0 && historyIndex < commandHistory.length) {
+                        // Clear current line
+                        for (let i = 0; i < currentLine.length; i++) {
+                            term.write('\b \b');
+                        }
+                        currentLine = commandHistory[historyIndex];
+                        term.write(currentLine);
+                    }
+                }
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (historyIndex === -1) {
+                        historyIndex = 0;
+                    } else if (historyIndex < commandHistory.length - 1) {
+                        historyIndex++;
+                    }
+                    
+                    if (historyIndex >= 0 && historyIndex < commandHistory.length) {
+                        // Clear current line
+                        for (let i = 0; i < currentLine.length; i++) {
+                            term.write('\b \b');
+                        }
+                        currentLine = commandHistory[historyIndex];
+                        term.write(currentLine);
+                    } else if (historyIndex === commandHistory.length) {
+                        // Clear to empty prompt
+                        for (let i = 0; i < currentLine.length; i++) {
+                            term.write('\b \b');
+                        }
+                        currentLine = '';
+                    }
+                }
+                
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    // Simple autocomplete for common commands
+                    const commands = ['ls', 'cd ', 'php ', 'git ', 'help', 'clear', 'exit'];
+                    const matches = commands.filter(cmd => cmd.startsWith(currentLine));
+                    
+                    if (matches.length === 1) {
+                        const completion = matches[0];
+                        const remainder = completion.substring(currentLine.length);
+                        term.write(remainder);
+                        currentLine = completion;
+                    } else if (matches.length > 1) {
+                        // Show suggestions
+                        term.writeln('\r\nSuggestions: ' + matches.slice(0, 5).join(', '));
+                        term.write('\x1b[38;5;34m' + currentCwd + '\x1b[0m\x1b[38;5;46m $ \x1b[0m');
+                        currentLine = '';
+                    }
                 }
             });
         }
 
         function executeCommand(cmd) {
             if (!cmd.trim()) {
-                term.write(currentCwd + '> ');
+                showPrompt();
                 return;
             }
 
-            if (cmd.trim() === 'cls' || cmd.trim() === 'clear') {
-                term.clear();
-                term.write(currentCwd + '> ');
+            // Handle built-in commands first
+            const trimmedCmd = cmd.trim();
+            
+            if (trimmedCmd === 'help') {
+                showHelp();
                 return;
             }
+            
+            if (trimmedCmd === 'exit' || trimmedCmd === 'quit') {
+                term.writeln('\r\nGoodbye! Type \x1b[38;5;34mhelp\x1b[0m to return to the terminal.');
+                return;
+            }
+
+            if (trimmedCmd === 'cls' || trimmedCmd === 'clear') {
+                term.clear();
+                showPrompt();
+                return;
+            }
+
+            if (trimmedCmd === 'history') {
+                term.writeln('\r\nCommand History:');
+                commandHistory.forEach((cmd, index) => {
+                    term.writeln(`  ${index + 1}: ${cmd}`);
+                });
+                showPrompt();
+                return;
+            }
+
+            // Show loading indicator for long commands
+            const container = document.getElementById('terminal-container');
+            container.classList.remove('error');
+            container.classList.add('active');
 
             // Call backend
             $.ajax({
                 url: 'terminal.php',
                 method: 'POST',
+                timeout: 30000,
                 data: JSON.stringify({ command: cmd, cwd: currentCwd }),
                 contentType: 'application/json',
+                beforeSend: function() {
+                    term.write('\x1b[38;5;46m⏳ Executing...\x1b[0m');
+                },
                 success: function (res) {
                     if (res.output) {
+                        // Clear loading indicator
+                        term.write('\r\x1b[K');
+                        
                         // Fix line endings for xterm
-                        let out = res.output.replace(/\n/g, '\r\n');
+                        let out = res.output;
+                        if (out.endsWith('\n') || out.endsWith('\r\n')) {
+                            out = out.replace(/\r?\n/g, '\r\n');
+                        } else {
+                            out = '\r\n' + out;
+                        }
                         term.write(out);
                     }
                     if (res.cwd) {
                         currentCwd = res.cwd;
                     }
-                    term.write(currentCwd + '> ');
+                    showPrompt();
                 },
-                error: function (err) {
-                    term.write('\r\nError communicating with server.\r\n' + currentCwd + '> ');
+                error: function (xhr, status, error) {
+                    // Clear loading indicator
+                    term.write('\r\x1b[K');
+                    
+                    let errorMsg = 'Command failed';
+                    if (status === 'timeout') {
+                        errorMsg = 'Command timed out';
+                    } else if (status >= 500) {
+                        errorMsg = 'Server error';
+                    }
+                    
+                    container.classList.remove('active');
+                    container.classList.add('error');
+                    term.writeln(`\r\n\x1b[38;5;196m✗ ${errorMsg}\x1b[0m`);
+                    showPrompt();
                 }
             });
+        }
+
+        function showPrompt() {
+            const cwdDisplay = currentCwd.length > 25 ? '../' + basename(currentCwd) : currentCwd;
+            term.write('\x1b[38;5;34m' + cwdDisplay + '\x1b[0m\x1b[38;5;46m$ \x1b[0m');
+        }
+
+        function showHelp() {
+            term.writeln('');
+            term.writeln('\x1b[38;5;208m╭─────────────────────────────────────────╮\x1b[0m');
+            term.writeln('\x1b[38;5;208m│ AVAILABLE COMMANDS                   │\x1b[0m');
+            term.writeln('\x1b[38;5;208m├─────────────────────────────────────────┤\x1b[0m');
+            term.writeln('\x1b[38;5;208m│ \x1b[38;5;40mls\x1b[0m        \x1b[38;5;208m- List directory contents  │\x1b[0m');
+            term.writeln('\x1b[38;5;208m│ \x1b[38;5;40mcd [path]\x1b[0m\x1b[38;5;208m- Change directory      │\x1b[0m');
+            term.writeln('\x1b[38;5;208m│ \x1b[38;5;40mphp file.php\x1b[0m\x1b[38;5;208m- Execute PHP script   │\x1b[0m');
+            term.writeln('\x1b[38;5;208m│ \x1b[38;5;40mclear/help/cls\x1b[0m\x1b[38;5;208m- Clear screen/help    │\x1b[0m');
+            term.writeln('\x1b[38;5;208m│ \x1b[38;5;40mhistory\x1b[0m\x1b[38;5;208m- Show command history  │\x1b[0m');
+            term.writeln('\x1b[38;5;208m│ \x1b[38;5;40mexit/quit\x1b[0m\x1b[38;5;208m- Exit terminal         │\x1b[0m');
+            term.writeln('\x1b[38;5;208m╰─────────────────────────────────────────╯\x1b[0m');
+            term.writeln('');
+            term.writeln('\x1b[38;5;46mTIP:\x1b[0m Use \x1b[38;5;34mTab\x1b[0m\x1b[38;5;46m for autocomplete!');
+            term.writeln('');
         }
 
         function executeRun() {
