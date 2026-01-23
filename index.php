@@ -602,23 +602,27 @@
 
             <!-- File Menu Dropdown -->
             <div class="dropdown" id="menu-file">
-                <div class="dropdown-item" onclick="createNewFile()">New Text File <span class="shortcut">Ctrl+N</span>
+                <div class="dropdown-item" onclick="fileMenuNewFile()">New Text File <span class="shortcut">Ctrl+N</span>
                 </div>
-                <div class="dropdown-item" onclick="createNewFolder()">New Folder</div>
+                <div class="dropdown-item" onclick="fileMenuNewFile('window')">New Window</div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="document.getElementById('file-upload').click()">Open File...</div>
-                <div class="dropdown-item" onclick="alert('Open Folder: Not implemented in browser environment')">Open
-                    Folder...</div>
+                <div class="dropdown-item" onclick="fileMenuOpenFolder()">Open Folder...</div>
+                <div class="dropdown-item" onclick="fileMenuOpenRecent()">Open Recent...</div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="saveFile()">Save <span class="shortcut">Ctrl+S</span></div>
                 <div class="dropdown-item" onclick="saveFileAs()">Save As... <span class="shortcut">Ctrl+Shift+S</span>
                 </div>
+                <div class="dropdown-item" onclick="saveAll()">Save All</div>
+                <div class="separator"></div>
                 <div class="dropdown-item" onclick="toggleAutoSave()">Auto Save <span id="autosave-indicator"></span>
                 </div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="closeFile()">Close Editor <span class="shortcut">Ctrl+F4</span>
                 </div>
-                <div class="dropdown-item" onclick="closeWorkspace()">Close Workspace</div>
+                <div class="dropdown-item" onclick="closeAllEditors()">Close All Editors</div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="exitApp()">Exit</div>
             </div>
             <input type="file" id="file-upload" style="display:none" onchange="handleFileUpload(event)" multiple>
 
@@ -631,15 +635,26 @@
                 <div class="dropdown-item" onclick="triggerEdit('copy')">Copy <span class="shortcut">Ctrl+C</span></div>
                 <div class="dropdown-item" onclick="triggerEdit('paste')">Paste <span class="shortcut">Ctrl+V</span>
                 </div>
+                <div class="dropdown-item" onclick="selectLine()">Select Line <span class="shortcut">Ctrl+L</span>
+                </div>
+                <div class="dropdown-item" onclick="deleteLine()">Delete Line <span class="shortcut">Ctrl+Shift+K</span>
+                </div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerEdit('find')">Find <span class="shortcut">Ctrl+F</span></div>
                 <div class="dropdown-item" onclick="triggerEdit('replace')">Replace <span class="shortcut">Ctrl+H</span>
                 </div>
+                <div class="dropdown-item" onclick="findInFiles()">Find in Files <span class="shortcut">Ctrl+Shift+F</span>
+                </div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerEdit('comment')">Toggle Line Comment <span
                         class="shortcut">Ctrl+/</span></div>
+                <div class="dropdown-item" onclick="toggleBlockComment()">Toggle Block Comment <span
+                        class="shortcut">Ctrl+Shift+A</span></div>
+                <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerEdit('format')">Format Document <span
                         class="shortcut">Shift+Alt+F</span></div>
+                <div class="dropdown-item" onclick="formatSelection()">Format Selection <span class="shortcut">Ctrl+K Ctrl+F</span>
+                </div>
             </div>
 
             <!-- Selection Menu Dropdown -->
@@ -652,20 +667,30 @@
 
             <!-- View Menu Dropdown -->
             <div class="dropdown" id="menu-view">
+                <div class="dropdown-item" onclick="toggleSidebar()">Appearance</div>
+                <div class="separator"></div>
                 <div class="dropdown-item" onclick="togglePanel()">Toggle Terminal <span class="shortcut">Ctrl+`</span>
                 </div>
                 <div class="dropdown-item" onclick="toggleSidebar()">Toggle Sidebar <span class="shortcut">Ctrl+B</span>
+                </div>
+                <div class="dropdown-item" onclick="toggleActivityBar()">Toggle Activity Bar</div>
+                <div class="dropdown-item" onclick="togglePanel(true)">Toggle Panel <span class="shortcut">Ctrl+J</span>
                 </div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerView('minimap')">Toggle Minimap</div>
                 <div class="dropdown-item" onclick="triggerView('wordwrap')">Toggle Word Wrap <span
                         class="shortcut">Alt+Z</span></div>
+                <div class="dropdown-item" onclick="toggleRenderWhitespace()">Toggle Render Whitespace</div>
+                <div class="dropdown-item" onclick="toggleLineNumbers()">Toggle Line Numbers</div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerView('zoomin')">Zoom In <span class="shortcut">Ctrl+=</span>
                 </div>
                 <div class="dropdown-item" onclick="triggerView('zoomout')">Zoom Out <span
                         class="shortcut">Ctrl+-</span></div>
                 <div class="dropdown-item" onclick="triggerView('zoomreset')">Reset Zoom</div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="toggleFullscreen()">Toggle Fullscreen <span class="shortcut">F11</span>
+                </div>
             </div>
 
             <!-- Go Menu Dropdown -->
@@ -692,10 +717,19 @@
 
             <!-- Help Menu Dropdown -->
             <div class="dropdown" id="menu-help">
+                <div class="dropdown-item" onclick="showWelcome()">Welcome</div>
+                <div class="dropdown-item" onclick="showDocumentation()">Documentation</div>
+                <div class="dropdown-item" onclick="showKeyboardShortcuts()">Keyboard Shortcuts <span class="shortcut">Ctrl+K Ctrl+S</span>
+                </div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="toggleDeveloperTools()">Toggle Developer Tools <span class="shortcut">F12</span>
+                </div>
+                <div class="dropdown-item" onclick="showProcessExplorer()">Open Process Explorer</div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="showAccessibilityOptions()">Accessibility Options</div>
+                <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerHelp()">About</div>
-                <div class="dropdown-item"
-                    onclick="alert('Accessibility Options: \nUse Alt+F1 for Screen Reader Access.\nHigh Contrast Theme is available in settings.')">
-                    Accessibility Options</div>
+                <div class="dropdown-item" onclick="checkUpdates()">Check for Updates...</div>
             </div>
 
         </div>
@@ -899,6 +933,42 @@
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
                 if (currentFile) saveFile();
+                return false;
+            }
+            // Ctrl+N for New File
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                createNewFile();
+                return false;
+            }
+            // Ctrl+B for Toggle Sidebar
+            if (e.ctrlKey && e.key === 'b') {
+                e.preventDefault();
+                toggleSidebar();
+                return false;
+            }
+            // F11 for Fullscreen
+            if (e.key === 'F11') {
+                e.preventDefault();
+                toggleFullscreen();
+                return false;
+            }
+            // Ctrl+` for Terminal
+            if (e.ctrlKey && e.key === '`') {
+                e.preventDefault();
+                togglePanel();
+                return false;
+            }
+            // Ctrl+L for Select Line
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                selectLine();
+                return false;
+            }
+            // F12 for Developer Tools
+            if (e.key === 'F12') {
+                e.preventDefault();
+                toggleDeveloperTools();
                 return false;
             }
         }, { capture: true });
@@ -1172,6 +1242,7 @@
                     monaco.editor.setModelLanguage(model, lang);
                     editor.setValue(res.content);
                     $('#status-lang').text(lang.toUpperCase());
+                    addToRecentFiles(path);
                 }
             }, 'json');
         }
@@ -1187,6 +1258,7 @@
                 if (res.success) {
                     // Success feedback
                     $('.tab').css('border-top-color', '#007acc');
+                    addToRecentFiles(currentFile);
                 } else {
                     alert('Error saving: ' + res.error);
                     $('.tab').css('border-top-color', 'red');
@@ -1261,6 +1333,168 @@
 
         function triggerHelp() {
             alert('VS Code Web Clone\n\nA lightweight PHP-based cloud IDE mimicking Visual Studio Code.\n\nVersion 1.0.0');
+        }
+
+        // Enhanced File Menu Functions
+        function fileMenuNewFile(type = 'file') {
+            if (type === 'window') {
+                window.open(window.location.href, '_blank');
+            } else {
+                createNewFile();
+            }
+        }
+
+        function fileMenuOpenFolder() {
+            alert('Open Folder functionality would open a folder browser.\nIn this web environment, you can use the file explorer to navigate folders.');
+        }
+
+        function fileMenuOpenRecent() {
+            const recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+            if (recentFiles.length === 0) {
+                alert('No recent files found.');
+                return;
+            }
+            
+            let fileList = recentFiles.map((file, index) => `${index + 1}. ${file}`).join('\n');
+            const choice = prompt(`Recent Files:\n${fileList}\n\nEnter file number to open:`);
+            
+            if (choice && !isNaN(choice)) {
+                const index = parseInt(choice) - 1;
+                if (index >= 0 && index < recentFiles.length) {
+                    openFile(recentFiles[index]);
+                }
+            }
+        }
+
+        function saveAll() {
+            if (!currentFile || !editor) {
+                alert('No files to save.');
+                return;
+            }
+            saveFile();
+            addToRecentFiles(currentFile);
+        }
+
+        function closeAllEditors() {
+            if (confirm('Close all editors? Unsaved changes will be lost.')) {
+                if (editor) {
+                    editor.setValue('');
+                    currentFile = '';
+                    $('.tab span:first-child').next().text('No File');
+                    $('.window-title').text('Web Code Workspace');
+                }
+            }
+        }
+
+        function exitApp() {
+            if (confirm('Exit application? Unsaved changes will be lost.')) {
+                if (confirm('This will close the browser tab. Continue?')) {
+                    window.close();
+                }
+            }
+        }
+
+        // Enhanced Edit Menu Functions
+        function selectLine() {
+            if (!editor) return;
+            const position = editor.getPosition();
+            const line = position.lineNumber;
+            editor.setSelection(new monaco.Selection(line, 1, line, 9999));
+        }
+
+        function deleteLine() {
+            if (!editor) return;
+            editor.trigger('menu', 'editor.action.deleteLines');
+        }
+
+        function findInFiles() {
+            const searchTerm = prompt('Search in files:');
+            if (searchTerm) {
+                alert(`Search for "${searchTerm}" in files would open a search results panel.\nThis feature requires a file indexing system.`);
+            }
+        }
+
+        function toggleBlockComment() {
+            if (!editor) return;
+            editor.trigger('menu', 'editor.action.blockComment');
+        }
+
+        function formatSelection() {
+            if (!editor) return;
+            editor.trigger('menu', 'editor.action.formatSelection');
+        }
+
+        // Enhanced View Menu Functions
+        function toggleActivityBar() {
+            const activityBar = $('#activitybar');
+            if (activityBar.css('display') === 'none') {
+                activityBar.css('display', 'flex');
+            } else {
+                activityBar.css('display', 'none');
+            }
+        }
+
+        function toggleRenderWhitespace() {
+            if (!editor) return;
+            const currentOption = editor.getOption(monaco.editor.EditorOption.renderWhitespace);
+            const newOption = currentOption === 'none' ? 'all' : 'none';
+            editor.updateOptions({ renderWhitespace: newOption });
+        }
+
+        function toggleLineNumbers() {
+            if (!editor) return;
+            const currentOption = editor.getOption(monaco.editor.EditorOption.lineNumbers);
+            const newOption = currentOption === 'on' ? 'off' : 'on';
+            editor.updateOptions({ lineNumbers: newOption });
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Enhanced Help Menu Functions
+        function showWelcome() {
+            alert('Welcome to VS Code Web Clone!\n\nThis is a lightweight, browser-based code editor that mimics Visual Studio Code.\n\nFeatures:\n• Syntax highlighting for multiple languages\n• AI Assistant integration\n• Terminal access\n• File management\n• Keyboard shortcuts');
+        }
+
+        function showDocumentation() {
+            window.open('https://code.visualstudio.com/docs', '_blank');
+        }
+
+        function showKeyboardShortcuts() {
+            var shortcuts = "Keyboard Shortcuts:\n\nFile:\nCtrl+N    New File\nCtrl+S    Save\nCtrl+Shift+S  Save As\nCtrl+W    Close File\n\nEdit:\nCtrl+Z    Undo\nCtrl+Y    Redo\nCtrl+X    Cut\nCtrl+C    Copy\nCtrl+V    Paste\nCtrl+F    Find\nCtrl+H    Replace\nCtrl+/    Toggle Line Comment\nCtrl+A    Select All\n\nView:\nCtrl+B    Toggle Sidebar\nCtrl+`    Toggle Terminal\nF11       Fullscreen\nCtrl+=    Zoom In\nCtrl+-    Zoom Out\n\nNavigation:\nCtrl+P    Go to File\nCtrl+G    Go to Line\nCtrl+0    Toggle AI Assistant\n\nRun:\nF5        Start Debugging\nCtrl+F5   Run Without Debugging";
+            alert(shortcuts);
+        }
+
+        function toggleDeveloperTools() {
+            if (typeof window.devtools === 'undefined') {
+                alert('Developer Tools: Use browser shortcut F12 or right-click and select "Inspect"');
+            }
+        }
+
+        function showProcessExplorer() {
+            alert('Process Explorer would show running processes and resource usage.\nThis feature is not available in the browser environment.');
+        }
+
+        function showAccessibilityOptions() {
+            alert('Accessibility Options:\n\n• Use Alt+F1 for Screen Reader Access\n• High Contrast Theme is available in settings\n• Keyboard navigation is enabled\n• Font size can be adjusted via View menu\n• Zoom functions are available');
+        }
+
+        function checkUpdates() {
+            alert('Check for Updates:\n\nThis is a web-based application.\nUpdates are deployed on the server automatically.\nVersion: 1.0.0\n\nNo manual update required.');
+        }
+
+        // Helper function to track recent files
+        function addToRecentFiles(filename) {
+            let recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+            recentFiles = recentFiles.filter(file => file !== filename);
+            recentFiles.unshift(filename);
+            recentFiles = recentFiles.slice(0, 10); // Keep only 10 most recent
+            localStorage.setItem('recentFiles', JSON.stringify(recentFiles));
         }
 
         // AI Assistant Functions
