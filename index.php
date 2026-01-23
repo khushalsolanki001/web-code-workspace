@@ -7,6 +7,9 @@
     <title>Visual Studio Code - Web</title>
 
     <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS Dependencies -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/css/xterm.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -474,27 +477,109 @@
             padding: 10px;
         }
 
-        .ai-message {
+        .ai-message, .chat-message {
             margin-bottom: 15px;
-            padding: 8px;
-            border-radius: 4px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            user-select: text;
         }
 
-        .ai-message.user {
+        .ai-message.user, .chat-message.user {
             background-color: #094771;
-            text-align: right;
+            text-align: left;
+            color: white;
+            border-left: 3px solid #007acc;
         }
 
-        .ai-message.assistant {
+        .ai-message.assistant, .chat-message.ai {
             background-color: var(--vscode-hover);
+            color: var(--vscode-text);
+            border-left: 3px solid #666;
         }
 
-        .ai-message pre {
+        .ai-message pre, .chat-message pre {
             background-color: #1e1e1e;
-            padding: 8px;
-            border-radius: 3px;
+            padding: 12px;
+            border-radius: 4px;
             overflow-x: auto;
-            margin: 5px 0;
+            margin: 8px 0;
+            border: 1px solid var(--vscode-border);
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            white-space: pre;
+            user-select: text;
+        }
+
+        .ai-message code, .chat-message code {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 11px;
+        }
+
+        .ai-message strong, .chat-message strong {
+            color: #007acc;
+            font-weight: bold;
+        }
+
+        .ai-message em, .chat-message em {
+            font-style: italic;
+        }
+
+        .ai-message ul, .ai-message ol, .chat-message ul, .chat-message ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .ai-message li, .chat-message li {
+            margin: 4px 0;
+        }
+
+        .text-danger {
+            color: #ff6b6b;
+        }
+
+        .text-muted {
+            color: var(--vscode-text-secondary);
+        }
+
+        /* Copy button for code blocks */
+        .ai-message pre {
+            position: relative;
+        }
+
+        .copy-code-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: var(--vscode-bg);
+            border: 1px solid var(--vscode-border);
+            color: var(--vscode-text);
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .ai-message pre:hover .copy-code-btn {
+            opacity: 1;
+        }
+
+        .copy-code-btn:hover {
+            background-color: var(--vscode-hover);
+            color: #007acc;
+        }
+
+        .copy-code-btn.copied {
+            background-color: #007acc;
+            color: white;
         }
 
         .ai-input-area {
@@ -582,6 +667,95 @@
             background-color: var(--vscode-border);
             margin: 4px 0;
         }
+
+        /* Chat UI Enhancements */
+        .ai-messages {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chat-message {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background-color: #007acc;
+            /* VS Code Blue */
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-message.ai {
+            align-self: flex-start;
+            background-color: #2d2d2d;
+            /* Darker gray */
+            color: #cccccc;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #3e3e42;
+        }
+
+        .chat-message.ai strong {
+            color: #569cd6;
+            /* Blue for strong text */
+        }
+
+        .chat-message.ai code {
+            background-color: #1e1e1e;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #d4d4d4;
+        }
+
+        .chat-message.ai pre {
+            background-color: #1e1e1e;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+            overflow-x: auto;
+            border: 1px solid #474747;
+        }
+
+        .ai-input-area {
+            padding: 15px;
+            border-top: 1px solid var(--vscode-border);
+            background-color: var(--vscode-sidebar-bg);
+            /* Bootstrap overrides for this section */
+        }
+
+        .ai-input-area textarea.form-control {
+            background-color: #3c3c3c;
+            border: 1px solid #3c3c3c;
+            color: #cccccc;
+            resize: none;
+            font-size: 13px;
+        }
+
+        .ai-input-area textarea.form-control:focus {
+            background-color: #3c3c3c;
+            border-color: #007acc;
+            color: #cccccc;
+            box-shadow: 0 0 0 0.2rem rgba(0, 122, 204, 0.25);
+        }
+
+        .btn-vscode {
+            background-color: #007acc;
+            color: white;
+            border: none;
+        }
+
+        .btn-vscode:hover {
+            background-color: #005a9e;
+            color: white;
+        }
     </style>
 </head>
 
@@ -602,7 +776,8 @@
 
             <!-- File Menu Dropdown -->
             <div class="dropdown" id="menu-file">
-                <div class="dropdown-item" onclick="fileMenuNewFile()">New Text File <span class="shortcut">Ctrl+N</span>
+                <div class="dropdown-item" onclick="fileMenuNewFile()">New Text File <span
+                        class="shortcut">Ctrl+N</span>
                 </div>
                 <div class="dropdown-item" onclick="fileMenuNewFile('window')">New Window</div>
                 <div class="separator"></div>
@@ -643,7 +818,8 @@
                 <div class="dropdown-item" onclick="triggerEdit('find')">Find <span class="shortcut">Ctrl+F</span></div>
                 <div class="dropdown-item" onclick="triggerEdit('replace')">Replace <span class="shortcut">Ctrl+H</span>
                 </div>
-                <div class="dropdown-item" onclick="findInFiles()">Find in Files <span class="shortcut">Ctrl+Shift+F</span>
+                <div class="dropdown-item" onclick="findInFiles()">Find in Files <span
+                        class="shortcut">Ctrl+Shift+F</span>
                 </div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerEdit('comment')">Toggle Line Comment <span
@@ -653,7 +829,8 @@
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerEdit('format')">Format Document <span
                         class="shortcut">Shift+Alt+F</span></div>
-                <div class="dropdown-item" onclick="formatSelection()">Format Selection <span class="shortcut">Ctrl+K Ctrl+F</span>
+                <div class="dropdown-item" onclick="formatSelection()">Format Selection <span class="shortcut">Ctrl+K
+                        Ctrl+F</span>
                 </div>
             </div>
 
@@ -689,7 +866,8 @@
                         class="shortcut">Ctrl+-</span></div>
                 <div class="dropdown-item" onclick="triggerView('zoomreset')">Reset Zoom</div>
                 <div class="separator"></div>
-                <div class="dropdown-item" onclick="toggleFullscreen()">Toggle Fullscreen <span class="shortcut">F11</span>
+                <div class="dropdown-item" onclick="toggleFullscreen()">Toggle Fullscreen <span
+                        class="shortcut">F11</span>
                 </div>
             </div>
 
@@ -719,10 +897,12 @@
             <div class="dropdown" id="menu-help">
                 <div class="dropdown-item" onclick="showWelcome()">Welcome</div>
                 <div class="dropdown-item" onclick="showDocumentation()">Documentation</div>
-                <div class="dropdown-item" onclick="showKeyboardShortcuts()">Keyboard Shortcuts <span class="shortcut">Ctrl+K Ctrl+S</span>
+                <div class="dropdown-item" onclick="showKeyboardShortcuts()">Keyboard Shortcuts <span
+                        class="shortcut">Ctrl+K Ctrl+S</span>
                 </div>
                 <div class="separator"></div>
-                <div class="dropdown-item" onclick="toggleDeveloperTools()">Toggle Developer Tools <span class="shortcut">F12</span>
+                <div class="dropdown-item" onclick="toggleDeveloperTools()">Toggle Developer Tools <span
+                        class="shortcut">F12</span>
                 </div>
                 <div class="dropdown-item" onclick="showProcessExplorer()">Open Process Explorer</div>
                 <div class="separator"></div>
@@ -891,14 +1071,14 @@
             $(document).on('click', '.menu-item', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 // Hide other dropdowns
                 $('.dropdown').not($(this).next('.dropdown')).hide();
-                
+
                 let menu = $(this).data('menu');
                 let offset = $(this).offset();
                 let $dropdown = $('#menu-' + menu);
-                
+
                 if ($dropdown.is(':visible')) {
                     $dropdown.hide();
                 } else {
@@ -917,6 +1097,14 @@
                     $('.dropdown').hide();
                 }
                 $('#context-menu').hide();
+            });
+
+            // AI Input keyboard shortcuts
+            $('#ai-input').on('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendAIQuery();
+                }
             });
         });
 
@@ -970,6 +1158,15 @@
                 e.preventDefault();
                 toggleDeveloperTools();
                 return false;
+            }
+            // Ctrl+Enter for AI Chat send
+            if (e.ctrlKey && e.key === 'Enter') {
+                const aiInput = document.getElementById('ai-input');
+                if (aiInput === document.activeElement) {
+                    e.preventDefault();
+                    sendAIQuery();
+                    return false;
+                }
             }
         }, { capture: true });
 
@@ -1354,10 +1551,10 @@
                 alert('No recent files found.');
                 return;
             }
-            
+
             let fileList = recentFiles.map((file, index) => `${index + 1}. ${file}`).join('\n');
             const choice = prompt(`Recent Files:\n${fileList}\n\nEnter file number to open:`);
-            
+
             if (choice && !isNaN(choice)) {
                 const index = parseInt(choice) - 1;
                 if (index >= 0 && index < recentFiles.length) {
@@ -1497,6 +1694,90 @@
             localStorage.setItem('recentFiles', JSON.stringify(recentFiles));
         }
 
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Helper function to format AI response
+        function formatAIResponse(response) {
+            if (!response) return '';
+            
+            let formatted = response;
+            
+            // Escape HTML first to prevent XSS
+            formatted = escapeHtml(formatted);
+            
+            // Format code blocks with language detection and copy button
+            formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, function(match, lang, code) {
+                const copyId = 'copy-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                return `<pre><button class="copy-code-btn" onclick="copyCode('${copyId}', this)" data-id="${copyId}">Copy</button><code id="${copyId}" class="language-${lang || 'text'}">${code}</code></pre>`;
+            });
+            
+            // Format inline code
+            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // Format bold text
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Format italic text
+            formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Format lists
+            formatted = formatted.replace(/^(\s*)[-*+]\s+(.+)$/gm, '$1<li>$2</li>');
+            formatted = formatted.replace(/^(\s*)\d+\.\s+(.+)$/gm, '$1<li>$2</li>');
+            
+            // Wrap consecutive list items
+            formatted = formatted.replace(/(<li>.*<\/li>\s*)+/gs, '<ul>$&</ul>');
+            
+            // Format line breaks
+            formatted = formatted.replace(/\n\n/g, '</p><p>');
+            formatted = formatted.replace(/\n/g, '<br>');
+            
+            // Add paragraph wrapper if there are multiple paragraphs
+            if (formatted.includes('</p><p>')) {
+                formatted = '<p>' + formatted + '</p>';
+            }
+            
+            return formatted;
+        }
+
+        // Function to copy code to clipboard
+        function copyCode(elementId, button) {
+            const codeElement = document.getElementById(elementId);
+            if (codeElement) {
+                navigator.clipboard.writeText(codeElement.textContent).then(function() {
+                    // Visual feedback
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    button.classList.add('copied');
+                    
+                    setTimeout(function() {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('Failed to copy code: ', err);
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = codeElement.textContent;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    button.textContent = 'Copied!';
+                    button.classList.add('copied');
+                    setTimeout(function() {
+                        button.textContent = 'Copy';
+                        button.classList.remove('copied');
+                    }, 2000);
+                });
+            }
+        }
+
         // AI Assistant Functions
         var autoSaveEnabled = false;
         var autoSaveInterval;
@@ -1510,33 +1791,33 @@
         var aiPanelStartWidth = 0;
         var aiPanelStartX = 0;
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             // AI Panel resize handlers
-            $('.ai-resize-handle').on('mousedown', function(e) {
+            $('.ai-resize-handle').on('mousedown', function (e) {
                 isResizingAI = true;
                 aiPanelStartWidth = $('#ai-panel').width();
                 aiPanelStartX = e.clientX;
                 e.preventDefault();
             });
 
-            $(document).on('mousemove', function(e) {
+            $(document).on('mousemove', function (e) {
                 if (!isResizingAI) return;
-                
+
                 var deltaX = aiPanelStartX - e.clientX;
                 var newWidth = aiPanelStartWidth + deltaX;
-                
+
                 // Constrain to min and max width
                 newWidth = Math.max(300, Math.min(800, newWidth));
-                
+
                 $('#ai-panel').width(newWidth);
-                
+
                 // Update the right position for closed state
                 if (!$('#ai-panel').hasClass('open')) {
                     $('#ai-panel').css('right', -newWidth + 'px');
                 }
             });
 
-            $(document).on('mouseup', function() {
+            $(document).on('mouseup', function () {
                 isResizingAI = false;
             });
         });
@@ -1550,10 +1831,17 @@
             const language = $('#status-lang').text().toLowerCase();
 
             // Add user message
-            $('#ai-messages').append(`<div class="ai-message user">${prompt}</div>`);
+            $('#ai-messages').append(`<div class="ai-message user"><strong>You:</strong> ${escapeHtml(prompt)}</div>`);
             $('#ai-input').val('');
             $('#ai-send-btn').prop('disabled', true);
-            $('#ai-messages').append('<div class="ai-loading"><i class="fas fa-spinner fa-spin"></i> Thinking...</div>');
+            
+            // Loading indicator
+            const loadingId = 'loading-' + Date.now();
+            $('#ai-messages').append(`<div id="${loadingId}" class="ai-message assistant"><i class="fas fa-circle-notch fa-spin"></i> Thinking...</div>`);
+            
+            // Auto-scroll
+            const messagesContainer = document.getElementById('ai-messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
             $.ajax({
                 url: 'ai_assistant.php',
@@ -1561,19 +1849,20 @@
                 data: JSON.stringify({ prompt, context: codeContext, language }),
                 contentType: 'application/json',
                 success: function (res) {
-                    $('.ai-loading').remove();
+                    $('#' + loadingId).remove();
                     if (res.success) {
-                        const formatted = res.response.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
-                        $('#ai-messages').append(`<div class="ai-message assistant">${formatted}</div>`);
+                        const formatted = formatAIResponse(res.response);
+                        $('#ai-messages').append(`<div class="ai-message assistant"><strong>AI:</strong><br>${formatted}</div>`);
                     } else {
-                        $('#ai-messages').append(`<div class="ai-message assistant" style="color:red;">Error: ${res.error}</div>`);
+                        $('#ai-messages').append(`<div class="ai-message assistant"><strong>AI Error:</strong><br>${escapeHtml(res.error)}</div>`);
                     }
-                    $('#ai-messages').scrollTop($('#ai-messages')[0].scrollHeight);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
                     $('#ai-send-btn').prop('disabled', false);
+                    $('#ai-input').focus();
                 },
                 error: function () {
-                    $('.ai-loading').remove();
-                    $('#ai-messages').append('<div class="ai-message assistant" style="color:red;">Failed to connect to AI service</div>');
+                    $('#' + loadingId).remove();
+                    $('#ai-messages').append('<div class="ai-message assistant"><strong>Connection Error:</strong><br>Failed to connect to AI service</div>');
                     $('#ai-send-btn').prop('disabled', false);
                 }
             });
@@ -1793,21 +2082,31 @@
     <!-- AI Assistant Panel -->
     <div id="ai-panel">
         <div class="ai-resize-handle"></div>
-        <div class="ai-header">
-            <h3>AI Assistant</h3>
+        <div class="ai-header d-flex justify-content-between align-items-center">
+            <h3 class="m-0"><i class="fas fa-robot me-2"></i>AI Assistant</h3>
             <span class="ai-close" onclick="toggleAIPanel()"><i class="fas fa-times"></i></span>
         </div>
-        <div class="ai-content">
-            <div class="ai-messages" id="ai-messages">
-                <div style="padding: 20px; text-align: center; color: #777;">
-                    <i class="fas fa-robot" style="font-size: 48px; margin-bottom: 10px;"></i>
-                    <p>Ask me anything about your code!</p>
-                    <p style="font-size: 11px;">I can help with debugging, explanations, and suggestions.</p>
+        <div class="ai-content d-flex flex-column">
+            <div class="ai-messages flex-grow-1" id="ai-messages">
+                <div class="ai-message assistant">
+                    <strong>AI Assistant:</strong><br>
+                    👋 Hello! I'm here to help you with your coding tasks.<br><br>
+                    You can ask me to:<br>
+                    • Explain code and suggest improvements<br>
+                    • Debug issues and fix errors<br>
+                    • Generate code snippets<br>
+                    • Help with best practices<br><br>
+                    <em>Press Enter to send, Shift+Enter for new line, or use the Send button.</em>
                 </div>
             </div>
             <div class="ai-input-area">
-                <textarea id="ai-input" class="ai-input" placeholder="Ask a question about your code..."></textarea>
-                <button class="ai-send-btn" onclick="sendAIQuery()" id="ai-send-btn">Send</button>
+                <div class="input-group">
+                    <textarea id="ai-input" class="form-control" rows="1"
+                        placeholder="Type a message... (Ctrl+Enter to send)"></textarea>
+                    <button class="btn btn-vscode" type="button" onclick="sendAIQuery()" id="ai-send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
