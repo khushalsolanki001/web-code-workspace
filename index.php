@@ -850,7 +850,7 @@
             });
 
             // Global keyboard shortcuts
-            $(document).keydown(function(e) {
+            $(document).keydown(function (e) {
                 // Ctrl+I for AI Assistant
                 if (e.ctrlKey && e.key === 'i') {
                     e.preventDefault();
@@ -1063,7 +1063,7 @@
                 });
 
                 // Right-click context menu
-                item.on('contextmenu', function(e) {
+                item.on('contextmenu', function (e) {
                     e.preventDefault();
                     showContextMenu(e.pageX, e.pageY, node);
                 });
@@ -1339,7 +1339,7 @@
             $('#context-menu').hide();
             if (!contextMenuNode) return;
 
-            switch(action) {
+            switch (action) {
                 case 'open':
                     if (contextMenuNode.type === 'file') {
                         openFile(contextMenuNode.path);
@@ -1371,7 +1371,7 @@
                 action: 'rename',
                 old_path: node.path,
                 new_path: newPath
-            }, function(res) {
+            }, function (res) {
                 if (res.success) {
                     loadExplorer();
                     if (currentFile === node.path) {
@@ -1384,16 +1384,16 @@
         }
 
         function deleteItem(node) {
-            const confirmMsg = node.type === 'folder' 
+            const confirmMsg = node.type === 'folder'
                 ? 'Delete folder "' + node.name + '" and all its contents?'
                 : 'Delete file "' + node.name + '"?';
-            
+
             if (!confirm(confirmMsg)) return;
 
             $.post('file_operations_enhanced.php', {
                 action: 'delete_recursive',
                 path: node.path
-            }, function(res) {
+            }, function (res) {
                 if (res.success) {
                     loadExplorer();
                     if (currentFile === node.path) {
@@ -1408,6 +1408,13 @@
 
     <!-- Context Menu -->
     <div id="context-menu">
+        <div class="context-menu-item" onclick="contextMenuAction('new-file')">
+            <i class="fas fa-file-plus"></i> New File
+        </div>
+        <div class="context-menu-item" onclick="contextMenuAction('new-folder')">
+            <i class="fas fa-folder-plus"></i> New Folder
+        </div>
+        <div class="context-menu-separator"></div>
         <div class="context-menu-item" onclick="contextMenuAction('open')">
             <i class="fas fa-folder-open"></i> Open
         </div>
