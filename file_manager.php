@@ -96,25 +96,25 @@ switch ($action) {
 
     case 'create':
         $path = $_POST['file'] ?? '';
-        if (!$path) die(json_encode(['error' => 'No filename provided']));
-        
+        if (!$path)
+            die(json_encode(['error' => 'No filename provided']));
+
         // Basic validation - prevent traversal
         $fullPath = $root . '/' . $path;
         $realRoot = realpath($root);
-        
+
         // Ensure strictly under root
         if (strpos(realpath(dirname($fullPath)), $realRoot) !== 0) {
-             die(json_encode(['error' => 'Invalid path']));
+            die(json_encode(['error' => 'Invalid path']));
         }
-        
+
         if (file_exists($fullPath)) {
             die(json_encode(['error' => 'File already exists']));
         }
-        
+
         if (file_put_contents($fullPath, "") !== false) {
             echo json_encode(['success' => true]);
-        } else {
-            echo json_encode(['error' => 'Create failed']));
+            echo json_encode(['error' => 'Create failed']);
         }
         break;
 
