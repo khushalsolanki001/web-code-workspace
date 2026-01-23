@@ -1183,6 +1183,158 @@
             100% { left: 100%; }
         }
 
+        /* AI Enhanced Features */
+        .ai-timestamp {
+            font-size: 10px;
+            color: var(--vscode-text-secondary);
+            font-weight: normal;
+            margin-left: 8px;
+        }
+
+        .ai-cached-badge {
+            background-color: var(--vscode-success);
+            color: white;
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .ai-loading-message {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-loading-text {
+            flex: 1;
+        }
+
+        .ai-loading-dots {
+            display: flex;
+            gap: 2px;
+        }
+
+        .ai-loading-dots span {
+            animation: loadingDot 1.4s infinite ease-in-out both;
+        }
+
+        .ai-loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .ai-loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        .ai-loading-dots span:nth-child(3) { animation-delay: 0; }
+
+        @keyframes loadingDot {
+            0%, 80%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .ai-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ai-action-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--vscode-text-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: var(--vscode-transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ai-action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--vscode-text);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-error-message {
+            border-left-color: var(--vscode-error);
+            background: linear-gradient(135deg, rgba(241, 76, 76, 0.1) 0%, rgba(241, 76, 76, 0.05) 100%);
+        }
+
+        .ai-error-content {
+            color: #ff9999;
+            margin: 4px 0;
+        }
+
+        .ai-error-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        /* Notifications */
+        .ai-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: var(--vscode-border-radius);
+            color: white;
+            font-size: 12px;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: notificationSlide 0.3s ease-out;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            max-width: 300px;
+        }
+
+        .ai-notification-success {
+            background-color: var(--vscode-success);
+        }
+
+        .ai-notification-error {
+            background-color: var(--vscode-error);
+        }
+
+        .ai-notification-info {
+            background-color: var(--vscode-accent);
+        }
+
+        .ai-notification.fade-out {
+            animation: notificationFade 0.3s ease-out;
+        }
+
+        @keyframes notificationSlide {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes notificationFade {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
         .context-menu-item {
             padding: 4px 20px;
             cursor: pointer;
@@ -1647,6 +1799,9 @@
                     sendAIQuery();
                 }
             });
+
+            // Initialize AI query tracking
+            initAIQueryTracking();
         });
 
         // Global Keyboard Shortcuts (Native Window Listener with Capture)
@@ -2363,48 +2518,269 @@
             });
         });
 
+        // Conversation Management
+        let conversationId = localStorage.getItem('ai_conversation_id') || generateConversationId();
+        
+        function generateConversationId() {
+            const id = 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('ai_conversation_id', id);
+            return id;
+        }
+
+        function resetConversation() {
+            conversationId = generateConversationId();
+            $('#ai-messages').empty().append(`
+                <div class="ai-message assistant">
+                    <strong>AI:</strong><br>
+                    🔄 Conversation reset. I'm ready to help with a fresh start!<br><br>
+                    <em>I'll remember our conversation within this session.</em>
+                </div>
+            `);
+        }
+
         function sendAIQuery() {
             const prompt = $('#ai-input').val().trim();
             if (!prompt) return;
 
             const selection = editor.getSelection();
-            const codeContext = editor.getModel().getValueInRange(selection) || editor.getValue();
+            const codeContext = editor.getModel().getValueInRange(selection) || '';
+            const fullContext = codeContext || editor.getValue();
             const language = $('#status-lang').text().toLowerCase();
 
-            // Add user message
-            $('#ai-messages').append(`<div class="ai-message user"><strong>You:</strong> ${escapeHtml(prompt)}</div>`);
+            // Add user message with timestamp
+            const timestamp = new Date().toLocaleTimeString();
+            $('#ai-messages').append(`
+                <div class="ai-message user">
+                    <strong>You:</strong> 
+                    <span class="ai-timestamp">${timestamp}</span>
+                    <div class="ai-prompt-content">${escapeHtml(prompt)}</div>
+                </div>
+            `);
+            
             $('#ai-input').val('');
             $('#ai-send-btn').prop('disabled', true);
             
-            // Loading indicator
+            // Enhanced loading indicator
             const loadingId = 'loading-' + Date.now();
-            $('#ai-messages').append(`<div id="${loadingId}" class="ai-message assistant"><i class="fas fa-circle-notch fa-spin"></i> Thinking...</div>`);
+            $('#ai-messages').append(`
+                <div id="${loadingId}" class="ai-message assistant ai-loading-message">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <span class="ai-loading-text">Analyzing your request...</span>
+                    <div class="ai-loading-dots">
+                        <span>.</span><span>.</span><span>.</span>
+                    </div>
+                </div>
+            `);
             
             // Auto-scroll
             const messagesContainer = document.getElementById('ai-messages');
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
+            // Simulate loading states for better UX
+            let loadingTexts = [
+                'Analyzing your request...',
+                'Processing context...',
+                'Generating response...',
+                'Finalizing answer...'
+            ];
+            let loadingIndex = 0;
+            const loadingInterval = setInterval(() => {
+                const textElement = $(`#${loadingId} .ai-loading-text`);
+                if (textElement.length) {
+                    loadingIndex = (loadingIndex + 1) % loadingTexts.length;
+                    textElement.text(loadingTexts[loadingIndex]);
+                }
+            }, 1500);
+
+            // Clear welcome message if this is the first query
+            if ($('#ai-messages .ai-message').length === 2) {
+                $('#ai-messages').empty();
+            }
+
             $.ajax({
                 url: 'ai_assistant.php',
                 method: 'POST',
-                data: JSON.stringify({ prompt, context: codeContext, language }),
+                timeout: 30000, // 30 second timeout
+                data: JSON.stringify({ 
+                    prompt, 
+                    context: fullContext, 
+                    language, 
+                    conversation_id: conversationId 
+                }),
                 contentType: 'application/json',
                 success: function (res) {
+                    clearInterval(loadingInterval);
                     $('#' + loadingId).remove();
+                    
                     if (res.success) {
+                        const responseTimestamp = new Date().toLocaleTimeString();
                         const formatted = formatAIResponse(res.response);
-                        $('#ai-messages').append(`<div class="ai-message assistant"><strong>AI:</strong><br>${formatted}</div>`);
+                        
+                        $('#ai-messages').append(`
+                            <div class="ai-message assistant">
+                                <strong>AI:</strong>
+                                <span class="ai-timestamp">${responseTimestamp}</span>
+                                ${res.cached ? '<span class="ai-cached-badge">⚡ Cached</span>' : ''}
+                                <div class="ai-response-content">${formatted}</div>
+                                <div class="ai-actions">
+                                    <button class="ai-action-btn" onclick="copyToClipboard('${escapeHtml(res.response)}')" title="Copy response">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="ai-action-btn" onclick="regenerateResponse()" title="Regenerate response">
+                                        <i class="fas fa-redo"></i>
+                                    </button>
+                                    <button class="ai-action-btn" onclick="resetConversation()" title="Start new conversation">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `);
                     } else {
-                        $('#ai-messages').append(`<div class="ai-message assistant"><strong>AI Error:</strong><br>${escapeHtml(res.error)}</div>`);
+                        const errorMessage = res.error || 'Unknown error occurred';
+                        $('#ai-messages').append(`
+                            <div class="ai-message assistant ai-error-message">
+                                <strong>⚠️ AI Error:</strong>
+                                <div class="ai-error-content">${escapeHtml(errorMessage)}</div>
+                                <div class="ai-error-actions">
+                                    <button class="ai-action-btn" onclick="retryLastQuery()" title="Retry">
+                                        <i class="fas fa-redo"></i> Retry
+                                    </button>
+                                    <button class="ai-action-btn" onclick="reportError('${escapeHtml(errorMessage)}')" title="Report issue">
+                                        <i class="fas fa-exclamation-triangle"></i> Report
+                                    </button>
+                                </div>
+                            </div>
+                        `);
                     }
+                    
                     messagesContainer.scrollTop = messagesContainer.scrollHeight;
                     $('#ai-send-btn').prop('disabled', false);
                     $('#ai-input').focus();
-                },
-                error: function () {
+                }
+            });
+        }
+
+        // Store last query for retry functionality
+        let lastQuery = {
+            prompt: '',
+            context: '',
+            language: ''
+        };
+
+        // Helper functions for AI actions
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                showNotification('Response copied to clipboard!', 'success');
+            }).catch(function(err) {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('Response copied!', 'success');
+            });
+        }
+
+        function regenerateResponse() {
+            if (lastQuery.prompt) {
+                sendAIQuery();
+            }
+        }
+
+        function retryLastQuery() {
+            $('#ai-input').val(lastQuery.prompt);
+            sendAIQuery();
+        }
+
+        function reportError(errorMessage) {
+            showNotification('Error reported: ' + errorMessage, 'info');
+            // In a real app, this would send to error tracking service
+        }
+
+        function checkAIStatus() {
+            showNotification('Checking AI service status...', 'info');
+            // Check if AI service is available
+            $.get('ai_assistant.php', function(data) {
+                if (data && !data.error) {
+                    showNotification('AI service is operational', 'success');
+                } else {
+                    showNotification('AI service is experiencing issues', 'error');
+                }
+            }).fail(function() {
+                showNotification('Cannot connect to AI service', 'error');
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = $(`
+                <div class="ai-notification ai-notification-${type}">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}-circle"></i>
+                    ${message}
+                </div>
+            `);
+            
+            $('body').append(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.addClass('fade-out');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Update sendAIQuery to store last query
+        function initAIQueryTracking() {
+            const originalSendAIQuery = sendAIQuery;
+            
+            sendAIQuery = function() {
+                const prompt = $('#ai-input').val().trim();
+                if (!prompt) return;
+
+                const selection = editor.getSelection();
+                const codeContext = editor.getModel().getValueInRange(selection) || '';
+                const fullContext = codeContext || editor.getValue();
+                const language = $('#status-lang').text().toLowerCase();
+
+                // Store for retry
+                lastQuery = { prompt, context: fullContext, language };
+
+                // Call original function
+                return originalSendAIQuery.call(this);
+            };
+        }
+                error: function (xhr, status, error) {
+                    clearInterval(loadingInterval);
                     $('#' + loadingId).remove();
-                    $('#ai-messages').append('<div class="ai-message assistant"><strong>Connection Error:</strong><br>Failed to connect to AI service</div>');
+                    
+                    let errorMessage = 'Failed to connect to AI service';
+                    if (status === 'timeout') {
+                        errorMessage = 'Request timed out. Please try again.';
+                    } else if (xhr.status === 429) {
+                        errorMessage = 'Too many requests. Please wait a moment before trying again.';
+                    } else if (xhr.status >= 500) {
+                        errorMessage = 'AI service is temporarily unavailable. Please try again later.';
+                    }
+                    
+                    $('#ai-messages').append(`
+                        <div class="ai-message assistant ai-error-message">
+                            <strong>🔌 Connection Error:</strong>
+                            <div class="ai-error-content">${errorMessage}</div>
+                            <div class="ai-error-actions">
+                                <button class="ai-action-btn" onclick="retryLastQuery()" title="Retry">
+                                    <i class="fas fa-redo"></i> Retry
+                                </button>
+                                <button class="ai-action-btn" onclick="checkAIStatus()" title="Check service status">
+                                    <i class="fas fa-info-circle"></i> Status
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                    
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
                     $('#ai-send-btn').prop('disabled', false);
+                    $('#ai-input').focus();
                 }
             });
         }
