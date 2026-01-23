@@ -525,6 +525,44 @@
             padding: 10px;
             color: var(--vscode-text-secondary);
         }
+
+        /* Context Menu */
+        #context-menu {
+            position: fixed;
+            background-color: var(--vscode-menu-bg);
+            border: 1px solid var(--vscode-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            z-index: 10000;
+            display: none;
+            min-width: 180px;
+            padding: 4px 0;
+        }
+
+        .context-menu-item {
+            padding: 4px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--vscode-text);
+        }
+
+        .context-menu-item:hover {
+            background-color: var(--vscode-menu-hover);
+            color: white;
+        }
+
+        .context-menu-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background-color: var(--vscode-border);
+            margin: 4px 0;
+        }
     </style>
 </head>
 
@@ -808,6 +846,17 @@
 
             $(document).click(function () {
                 $('.dropdown').hide();
+                $('#context-menu').hide();
+            });
+
+            // Global keyboard shortcuts
+            $(document).keydown(function(e) {
+                // Ctrl+I for AI Assistant
+                if (e.ctrlKey && e.key === 'i') {
+                    e.preventDefault();
+                    toggleAIPanel();
+                    return false;
+                }
             });
         });
 
@@ -1000,20 +1049,23 @@
                 if (node.name === 'terminal.php') iconClass = 'fa-terminal';
 
                 item.html('<i class="fas ' + iconClass + '"></i> ' + node.name);
+                item.data('node', node); // Store node data
 
-                // Add click handler
+                // Click handler
                 item.click(function (e) {
                     e.stopPropagation();
-                    // Basic selection visual
                     $('.explorer-item').css('background-color', '');
                     $(this).css('background-color', '#37373d');
 
                     if (node.type === 'file') {
                         openFile(node.path);
-                    } else {
-                        // Toggle folder logic would go here
-                        // For now just expanding is not implemented in this simple recursor
                     }
+                });
+
+                // Right-click context menu
+                item.on('contextmenu', function(e) {
+                    e.preventDefault();
+                    showContextMenu(e.pageX, e.pageY, node);
                 });
 
                 container.append(item);
@@ -1195,7 +1247,7 @@
                 method: 'POST',
                 data: JSON.stringify({ prompt, context: codeContext, language }),
                 contentType: 'application/json',
-                success: function(res) {
+                success: function (res) {
                     $('.ai-loading').remove();
                     if (res.success) {
                         const formatted = res.response.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
@@ -1206,7 +1258,7 @@
                     $('#ai-messages').scrollTop($('#ai-messages')[0].scrollHeight);
                     $('#ai-send-btn').prop('disabled', false);
                 },
-                error: function() {
+                error: function () {
                     $('.ai-loading').remove();
                     $('#ai-messages').append('<div class="ai-message assistant" style="color:red;">Failed to connect to AI service</div>');
                     $('#ai-send-btn').prop('disabled', false);
@@ -1219,8 +1271,8 @@
             const files = event.target.files;
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    $.post('file_manager.php', { action: 'write', path: file.name, content: e.target.result }, function(res) {
+                reader.onload = function (e) {
+                    $.post('file_manager.php', { action: 'write', path: file.name, content: e.target.result }, function (res) {
                         if (res.success) {
                             loadExplorer();
                             openFile(file.name);
@@ -1238,7 +1290,7 @@
             const newName = prompt('Save as:', currentFile);
             if (newName) {
                 const content = editor.getValue();
-                $.post('file_manager.php', { action: 'write', path: newName, content }, function(res) {
+                $.post('file_manager.php', { action: 'write', path: newName, content }, function (res) {
                     if (res.success) {
                         currentFile = newName;
                         loadExplorer();
@@ -1268,23 +1320,108 @@
             }
         }
 
-        // Add Ctrl+I keybinding for AI
-        $(document).ready(function() {
-            $(document).keydown(function(e) {
-                if (e.ctrlKey && e.key === 'i') {
-                    e.preventDefault();
-                    toggleAIPanel();
-                }
-            });
+        // Add Ctrl+I keybinding for AI (removed nested ready)
+        // Moved to main $(document).ready() above
 
-            // Enter to send AI query
-            $('#ai-input').keydown(function(e) {
-                if (e.ctrlKey && e.key === 'Enter') {
-                    sendAIQuery();
-                }
+        // Context Menu Functions
+        var contextMenuNode = null;
+
+        function showContextMenu(x, y, node) {
+            contextMenuNode = node;
+            $('#context-menu').css({
+                left: x + 'px',
+                top: y + 'px',
+                display: 'block'
             });
-        });
+        }
+
+        function contextMenuAction(action) {
+            $('#context-menu').hide();
+            if (!contextMenuNode) return;
+
+            switch(action) {
+                case 'open':
+                    if (contextMenuNode.type === 'file') {
+                        openFile(contextMenuNode.path);
+                    }
+                    break;
+                case 'rename':
+                    renameItem(contextMenuNode);
+                    break;
+                case 'delete':
+                    deleteItem(contextMenuNode);
+                    break;
+                case 'copy-path':
+                    navigator.clipboard.writeText(contextMenuNode.path);
+                    alert('Path copied: ' + contextMenuNode.path);
+                    break;
+            }
+            contextMenuNode = null;
+        }
+
+        function renameItem(node) {
+            const newName = prompt('Rename to:', node.name);
+            if (!newName || newName === node.name) return;
+
+            const pathParts = node.path.split('/');
+            pathParts[pathParts.length - 1] = newName;
+            const newPath = pathParts.join('/');
+
+            $.post('file_operations_enhanced.php', {
+                action: 'rename',
+                old_path: node.path,
+                new_path: newPath
+            }, function(res) {
+                if (res.success) {
+                    loadExplorer();
+                    if (currentFile === node.path) {
+                        currentFile = newPath;
+                    }
+                } else {
+                    alert('Error: ' + res.error);
+                }
+            }, 'json');
+        }
+
+        function deleteItem(node) {
+            const confirmMsg = node.type === 'folder' 
+                ? 'Delete folder "' + node.name + '" and all its contents?'
+                : 'Delete file "' + node.name + '"?';
+            
+            if (!confirm(confirmMsg)) return;
+
+            $.post('file_operations_enhanced.php', {
+                action: 'delete_recursive',
+                path: node.path
+            }, function(res) {
+                if (res.success) {
+                    loadExplorer();
+                    if (currentFile === node.path) {
+                        closeFile();
+                    }
+                } else {
+                    alert('Error: ' + res.error);
+                }
+            }, 'json');
+        }
     </script>
+
+    <!-- Context Menu -->
+    <div id="context-menu">
+        <div class="context-menu-item" onclick="contextMenuAction('open')">
+            <i class="fas fa-folder-open"></i> Open
+        </div>
+        <div class="context-menu-item" onclick="contextMenuAction('rename')">
+            <i class="fas fa-edit"></i> Rename
+        </div>
+        <div class="context-menu-item" onclick="contextMenuAction('delete')">
+            <i class="fas fa-trash"></i> Delete
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="contextMenuAction('copy-path')">
+            <i class="fas fa-copy"></i> Copy Path
+        </div>
+    </div>
 
     <!-- AI Assistant Panel -->
     <div id="ai-panel">
