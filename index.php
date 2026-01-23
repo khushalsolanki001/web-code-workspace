@@ -406,12 +406,31 @@
             top: 30px;
             bottom: 22px;
             width: 400px;
+            min-width: 300px;
+            max-width: 800px;
             background-color: var(--vscode-sidebar-bg);
             border-left: 1px solid var(--vscode-border);
             display: flex;
             flex-direction: column;
             transition: right 0.3s ease;
             z-index: 1000;
+            resize: horizontal;
+            overflow: auto;
+        }
+
+        .ai-resize-handle {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            cursor: ew-resize;
+            background-color: transparent;
+            z-index: 1001;
+        }
+
+        .ai-resize-handle:hover {
+            background-color: var(--vscode-statusbar-bg);
         }
 
         #ai-panel.open {
@@ -698,6 +717,7 @@
             </div>
             <div class="activity-icon" title="Source Control" onclick="switchSidebar('scm')"><i
                     class="fas fa-code-branch"></i></div>
+            <div class="activity-icon" title="AI Assistant" onclick="toggleAIPanel()"><i class="fas fa-robot"></i></div>
             <div class="activity-icon" title="Run and Debug" onclick="switchSidebar('run')"><i class="fas fa-play"></i>
             </div>
             <div class="activity-icon" title="Extensions" onclick="switchSidebar('extensions')"><i
@@ -825,29 +845,29 @@
         var minimapEnabled = true;
         var wordWrapEnabled = false;
 
+
+
         $(document).ready(function () {
             initLayout();
             initMonaco();
             initTerminal();
             loadExplorer();
 
-            // Menu Bindings
-            // Menu Bindings - Improved
-            $('.menu-item').on('click', function (e) {
+            // Menu Bindings - Event Delegation (Robust)
+            $(document).on('click', '.menu-item', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-
-                // Hide other dropdowns first
+                
+                // Hide other dropdowns
                 $('.dropdown').not($(this).next('.dropdown')).hide();
-
+                
                 let menu = $(this).data('menu');
                 let offset = $(this).offset();
                 let $dropdown = $('#menu-' + menu);
-
+                
                 if ($dropdown.is(':visible')) {
                     $dropdown.hide();
                 } else {
-                    // Position and show
                     $dropdown.css({
                         top: (offset.top + 28) + 'px',
                         left: offset.left + 'px',
@@ -857,23 +877,31 @@
                 }
             });
 
+            // Close all menus on outside click
             $(document).on('click', function (e) {
                 if (!$(e.target).closest('.menu-item').length && !$(e.target).closest('.dropdown').length) {
                     $('.dropdown').hide();
                 }
                 $('#context-menu').hide();
             });
-
-            // Global keyboard shortcuts
-            $(document).keydown(function (e) {
-                // Ctrl+0 for AI Assistant
-                if (e.ctrlKey && e.key === '0') {
-                    e.preventDefault();
-                    toggleAIPanel();
-                    return false;
-                }
-            });
         });
+
+        // Global Keyboard Shortcuts (Native Window Listener with Capture)
+        window.addEventListener('keydown', function (e) {
+            // Ctrl+0 for AI Assistant
+            if (e.ctrlKey && e.key === '0') {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleAIPanel();
+                return false;
+            }
+            // Ctrl+S for Save
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                if (currentFile) saveFile();
+                return false;
+            }
+        }, { capture: true });
 
         function switchSidebar(viewName) {
             // Update Activity Bar
@@ -1243,6 +1271,42 @@
             $('#ai-panel').toggleClass('open');
         }
 
+        // AI Panel Resize Functionality
+        var isResizingAI = false;
+        var aiPanelStartWidth = 0;
+        var aiPanelStartX = 0;
+
+        $(document).ready(function() {
+            // AI Panel resize handlers
+            $('.ai-resize-handle').on('mousedown', function(e) {
+                isResizingAI = true;
+                aiPanelStartWidth = $('#ai-panel').width();
+                aiPanelStartX = e.clientX;
+                e.preventDefault();
+            });
+
+            $(document).on('mousemove', function(e) {
+                if (!isResizingAI) return;
+                
+                var deltaX = aiPanelStartX - e.clientX;
+                var newWidth = aiPanelStartWidth + deltaX;
+                
+                // Constrain to min and max width
+                newWidth = Math.max(300, Math.min(800, newWidth));
+                
+                $('#ai-panel').width(newWidth);
+                
+                // Update the right position for closed state
+                if (!$('#ai-panel').hasClass('open')) {
+                    $('#ai-panel').css('right', -newWidth + 'px');
+                }
+            });
+
+            $(document).on('mouseup', function() {
+                isResizingAI = false;
+            });
+        });
+
         function sendAIQuery() {
             const prompt = $('#ai-input').val().trim();
             if (!prompt) return;
@@ -1494,8 +1558,9 @@
 
     <!-- AI Assistant Panel -->
     <div id="ai-panel">
+        <div class="ai-resize-handle"></div>
         <div class="ai-header">
-            <h3><i class="fas fa-robot"></i> AI Assistant (Ctrl+0)</h3>
+            <h3>AI Assistant</h3>
             <span class="ai-close" onclick="toggleAIPanel()"><i class="fas fa-times"></i></span>
         </div>
         <div class="ai-content">
