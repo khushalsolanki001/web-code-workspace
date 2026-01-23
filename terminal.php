@@ -30,7 +30,7 @@ $blacklistedPatterns = [
 ];
 
 foreach ($blacklistedPatterns as $pattern) {
-    if (preg_match('/' . $pattern . '/i', $command)) {
+    if (preg_match('/' . preg_quote($pattern, '/') . '/i', $command)) {
         echo json_encode([
             'output' => "⚠️ Command blocked for security reasons\r\n",
             'error' => true,
@@ -92,15 +92,17 @@ switch (strtolower(trim($command))) {
     case 'ls':
         // Enhanced ls command
         $files = array_diff(scandir('.'), ['.', '..']);
-        $output = '';
+            $output = '';
         foreach ($files as $file) {
             $color = '';
+            $icon = '';
+            
             if (is_dir($file)) {
                 $color = "\033[38;5;208m"; // Blue for directories
-                $icon = '📁';
+                $icon = 'D';
             } else {
                 $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                $icon = match($ext) ? '📄' : '📝';
+                $icon = in_array($ext, ['json', 'xml', 'config', 'log']) ? 'F' : 'T';
                 switch ($ext) {
                     case 'php': $color = "\033[38;5;135m"; break; // Purple
                     case 'js': $color = "\033[38;5;226m"; break; // Yellow

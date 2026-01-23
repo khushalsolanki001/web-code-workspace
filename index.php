@@ -33,7 +33,7 @@
             --vscode-tab-active-bg: #1a1a1a;
             --vscode-menu-bg: #2d2d30;
             --vscode-menu-hover: #094771;
-            
+
             /* Modern UI Variables */
             --vscode-accent: #0078d4;
             --vscode-accent-hover: #106ebe;
@@ -159,6 +159,7 @@
                 opacity: 0;
                 transform: translateY(-4px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -623,8 +624,16 @@
         }
 
         @keyframes terminalCursor {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
         }
 
         /* Status Bar */
@@ -865,7 +874,8 @@
             background: var(--vscode-text-secondary);
         }
 
-        .ai-message, .chat-message {
+        .ai-message,
+        .chat-message {
             margin-bottom: 16px;
             padding: 12px 14px;
             border-radius: var(--vscode-border-radius);
@@ -881,20 +891,23 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        .ai-message.user, .chat-message.user {
+        .ai-message.user,
+        .chat-message.user {
             background: linear-gradient(135deg, #094771 0%, #063661 100%);
             color: white;
             border-left: 3px solid var(--vscode-accent);
             margin-right: 20px;
         }
 
-        .ai-message.assistant, .chat-message.ai {
+        .ai-message.assistant,
+        .chat-message.ai {
             background-color: var(--vscode-hover);
             color: var(--vscode-text);
             border-left: 3px solid var(--vscode-accent);
@@ -907,7 +920,8 @@
             padding: 10px;
         }
 
-        .ai-message, .chat-message {
+        .ai-message,
+        .chat-message {
             margin-bottom: 15px;
             padding: 10px 12px;
             border-radius: 6px;
@@ -916,20 +930,23 @@
             user-select: text;
         }
 
-        .ai-message.user, .chat-message.user {
+        .ai-message.user,
+        .chat-message.user {
             background-color: #094771;
             text-align: left;
             color: white;
             border-left: 3px solid #007acc;
         }
 
-        .ai-message.assistant, .chat-message.ai {
+        .ai-message.assistant,
+        .chat-message.ai {
             background-color: var(--vscode-hover);
             color: var(--vscode-text);
             border-left: 3px solid #666;
         }
 
-        .ai-message pre, .chat-message pre {
+        .ai-message pre,
+        .chat-message pre {
             background-color: #1e1e1e;
             padding: 12px;
             border-radius: 4px;
@@ -943,7 +960,8 @@
             user-select: text;
         }
 
-        .ai-message code, .chat-message code {
+        .ai-message code,
+        .chat-message code {
             background-color: rgba(0, 0, 0, 0.2);
             padding: 2px 4px;
             border-radius: 3px;
@@ -951,21 +969,27 @@
             font-size: 11px;
         }
 
-        .ai-message strong, .chat-message strong {
+        .ai-message strong,
+        .chat-message strong {
             color: #007acc;
             font-weight: bold;
         }
 
-        .ai-message em, .chat-message em {
+        .ai-message em,
+        .chat-message em {
             font-style: italic;
         }
 
-        .ai-message ul, .ai-message ol, .chat-message ul, .chat-message ol {
+        .ai-message ul,
+        .ai-message ol,
+        .chat-message ul,
+        .chat-message ol {
             margin: 8px 0;
             padding-left: 20px;
         }
 
-        .ai-message li, .chat-message li {
+        .ai-message li,
+        .chat-message li {
             margin: 4px 0;
         }
 
@@ -1148,6 +1172,7 @@
                 opacity: 0;
                 transform: scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
@@ -1203,25 +1228,39 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideIn {
-            from { 
-                opacity: 0; 
-                transform: translateY(20px); 
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         /* Loading states */
@@ -1237,13 +1276,18 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             animation: loading 1.5s infinite;
         }
 
         @keyframes loading {
-            0% { left: -100%; }
-            100% { left: 100%; }
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
         }
 
         /* AI Enhanced Features */
@@ -1283,15 +1327,27 @@
             animation: loadingDot 1.4s infinite ease-in-out both;
         }
 
-        .ai-loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .ai-loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-        .ai-loading-dots span:nth-child(3) { animation-delay: 0; }
+        .ai-loading-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .ai-loading-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        .ai-loading-dots span:nth-child(3) {
+            animation-delay: 0;
+        }
 
         @keyframes loadingDot {
-            0%, 80%, 100% {
+
+            0%,
+            80%,
+            100% {
                 opacity: 0.3;
                 transform: scale(0.8);
             }
+
             40% {
                 opacity: 1;
                 transform: scale(1);
@@ -1381,6 +1437,7 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -1392,6 +1449,7 @@
                 opacity: 1;
                 transform: translateX(0);
             }
+
             to {
                 opacity: 0;
                 transform: translateX(100%);
@@ -1564,110 +1622,113 @@
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerEdit('cut')">Cut <span class="shortcut">Ctrl+X</span></div>
                 <div class="dropdown-item" onclick="triggerEdit('copy')">Copy <span class="shortcut">Ctrl+C</span></div>
-                <div class="dropdown-item" onclick="triggerEdit('paste')">Paste <span class="shortcut">Ctrl+V</span></div>
+                <div class="dropdown-item" onclick="triggerEdit('paste')">Paste <span class="shortcut">Ctrl+V</span>
+                </div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="selectLine()">Select Line <span class="shortcut">Ctrl+L</span></div>
-                <div class="dropdown-item" onclick="deleteLine()">Delete Line <span class="shortcut">Ctrl+Shift+K</span></div>
+                <div class="dropdown-item" onclick="deleteLine()">Delete Line <span class="shortcut">Ctrl+Shift+K</span>
+                </div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerEdit('find')">Find <span class="shortcut">Ctrl+F</span></div>
-                <div class="dropdown-item" onclick="triggerEdit('replace')">Replace <span class="shortcut">Ctrl+H</span></div>
-                <div class="dropdown-item" onclick="findInFiles()">Find in Files <span class="shortcut">Ctrl+Shift+F</span></div>
-                <div class="separator"></div>
-                <div class="dropdown-item" onclick="triggerEdit('comment')">Toggle Line Comment <span class="shortcut">Ctrl+/</span></div>
-                <div class="dropdown-item" onclick="toggleBlockComment()">Toggle Block Comment <span class="shortcut">Ctrl+Shift+A</span></div>
-                <div class="separator"></div>
-                <div class="dropdown-item" onclick="triggerEdit('format')">Format Document <span class="shortcut">Shift+Alt+F</span></div>
-                <div class="dropdown-item" onclick="formatSelection()">Format Selection <span class="shortcut">Ctrl+K Ctrl+F</span></div>
-            </div>
-                        Ctrl+F</span>
+                <div class="dropdown-item" onclick="triggerEdit('replace')">Replace <span class="shortcut">Ctrl+H</span>
                 </div>
-            </div>
-
-            <!-- Selection Menu Dropdown -->
-            <div class="dropdown" id="menu-selection">
-                <div class="dropdown-item" onclick="triggerSelection('all')">Select All <span
-                        class="shortcut">Ctrl+A</span></div>
-                <div class="dropdown-item" onclick="triggerSelection('expand')">Expand Selection <span
-                        class="shortcut">Shift+Alt+Right</span></div>
-            </div>
-
-            <!-- View Menu Dropdown -->
-            <div class="dropdown" id="menu-view">
-                <div class="dropdown-item" onclick="toggleSidebar()">Appearance</div>
+                <div class="dropdown-item" onclick="findInFiles()">Find in Files <span
+                        class="shortcut">Ctrl+Shift+F</span></div>
                 <div class="separator"></div>
-                <div class="dropdown-item" onclick="togglePanel()">Toggle Terminal <span class="shortcut">Ctrl+`</span>
-                </div>
-                <div class="dropdown-item" onclick="toggleSidebar()">Toggle Sidebar <span class="shortcut">Ctrl+B</span>
-                </div>
-                <div class="dropdown-item" onclick="toggleActivityBar()">Toggle Activity Bar</div>
-                <div class="dropdown-item" onclick="togglePanel(true)">Toggle Panel <span class="shortcut">Ctrl+J</span>
-                </div>
+                <div class="dropdown-item" onclick="triggerEdit('comment')">Toggle Line Comment <span
+                        class="shortcut">Ctrl+/</span></div>
+                <div class="dropdown-item" onclick="toggleBlockComment()">Toggle Block Comment <span
+                        class="shortcut">Ctrl+Shift+A</span></div>
                 <div class="separator"></div>
-                <div class="dropdown-item" onclick="triggerView('minimap')">Toggle Minimap</div>
-                <div class="dropdown-item" onclick="triggerView('wordwrap')">Toggle Word Wrap <span
-                        class="shortcut">Alt+Z</span></div>
-                <div class="dropdown-item" onclick="toggleRenderWhitespace()">Toggle Render Whitespace</div>
-                <div class="dropdown-item" onclick="toggleLineNumbers()">Toggle Line Numbers</div>
-                <div class="separator"></div>
-                <div class="dropdown-item" onclick="triggerView('zoomin')">Zoom In <span class="shortcut">Ctrl+=</span>
-                </div>
-                <div class="dropdown-item" onclick="triggerView('zoomout')">Zoom Out <span
-                        class="shortcut">Ctrl+-</span></div>
-                <div class="dropdown-item" onclick="triggerView('zoomreset')">Reset Zoom</div>
-                <div class="separator"></div>
-                <div class="dropdown-item" onclick="toggleFullscreen()">Toggle Fullscreen <span
-                        class="shortcut">F11</span>
-                </div>
+                <div class="dropdown-item" onclick="triggerEdit('format')">Format Document <span
+                        class="shortcut">Shift+Alt+F</span></div>
+                <div class="dropdown-item" onclick="formatSelection()">Format Selection <span class="shortcut">Ctrl+K
+                        Ctrl+F</span></div>
             </div>
-
-            <!-- Go Menu Dropdown -->
-            <div class="dropdown" id="menu-go">
-                <div class="dropdown-item" onclick="triggerGo('file')">Go to File... <span
-                        class="shortcut">Ctrl+P</span></div>
-                <div class="dropdown-item" onclick="triggerGo('line')">Go to Line... <span
-                        class="shortcut">Ctrl+G</span></div>
-            </div>
-
-            <!-- Run Menu Dropdown -->
-            <div class="dropdown" id="menu-run">
-                <div class="dropdown-item" onclick="executeRun()">Start Debugging <span class="shortcut">F5</span></div>
-                <div class="dropdown-item" onclick="executeRun()">Run Without Debugging <span
-                        class="shortcut">Ctrl+F5</span></div>
-            </div>
-
-            <!-- Terminal Menu Dropdown -->
-            <div class="dropdown" id="menu-terminal">
-                <div class="dropdown-item" onclick="togglePanel()">New Terminal <span
-                        class="shortcut">Ctrl+Shift+`</span></div>
-                <div class="dropdown-item" onclick="executeCommand('cls')">Clear Terminal</div>
-            </div>
-
-            <!-- Help Menu Dropdown -->
-            <div class="dropdown" id="menu-help">
-                <div class="dropdown-item" onclick="showWelcome()">Welcome</div>
-                <div class="dropdown-item" onclick="showDocumentation()">Documentation</div>
-                <div class="dropdown-item" onclick="showKeyboardShortcuts()">Keyboard Shortcuts <span
-                        class="shortcut">Ctrl+K Ctrl+S</span>
-                </div>
-                <div class="separator"></div>
-                <div class="dropdown-item" onclick="toggleDeveloperTools()">Toggle Developer Tools <span
-                        class="shortcut">F12</span>
-                </div>
-                <div class="dropdown-item" onclick="showProcessExplorer()">Open Process Explorer</div>
-                <div class="separator"></div>
-                <div class="dropdown-item" onclick="showAccessibilityOptions()">Accessibility Options</div>
-                <div class="separator"></div>
-                <div class="dropdown-item" onclick="triggerHelp()">About</div>
-                <div class="dropdown-item" onclick="checkUpdates()">Check for Updates...</div>
-            </div>
-
+            Ctrl+F</span>
         </div>
-        <div class="window-title">Web Code Workspace</div>
-        <div class="window-controls">
-            <i class="fas fa-window-minimize" style="padding: 0 8px;"></i>
-            <i class="fas fa-window-maximize" style="padding: 0 8px;"></i>
-            <i class="fas fa-times" style="padding: 0 8px;"></i>
+    </div>
+
+    <!-- Selection Menu Dropdown -->
+    <div class="dropdown" id="menu-selection">
+        <div class="dropdown-item" onclick="triggerSelection('all')">Select All <span class="shortcut">Ctrl+A</span>
         </div>
+        <div class="dropdown-item" onclick="triggerSelection('expand')">Expand Selection <span
+                class="shortcut">Shift+Alt+Right</span></div>
+    </div>
+
+    <!-- View Menu Dropdown -->
+    <div class="dropdown" id="menu-view">
+        <div class="dropdown-item" onclick="toggleSidebar()">Appearance</div>
+        <div class="separator"></div>
+        <div class="dropdown-item" onclick="togglePanel()">Toggle Terminal <span class="shortcut">Ctrl+`</span>
+        </div>
+        <div class="dropdown-item" onclick="toggleSidebar()">Toggle Sidebar <span class="shortcut">Ctrl+B</span>
+        </div>
+        <div class="dropdown-item" onclick="toggleActivityBar()">Toggle Activity Bar</div>
+        <div class="dropdown-item" onclick="togglePanel(true)">Toggle Panel <span class="shortcut">Ctrl+J</span>
+        </div>
+        <div class="separator"></div>
+        <div class="dropdown-item" onclick="triggerView('minimap')">Toggle Minimap</div>
+        <div class="dropdown-item" onclick="triggerView('wordwrap')">Toggle Word Wrap <span
+                class="shortcut">Alt+Z</span></div>
+        <div class="dropdown-item" onclick="toggleRenderWhitespace()">Toggle Render Whitespace</div>
+        <div class="dropdown-item" onclick="toggleLineNumbers()">Toggle Line Numbers</div>
+        <div class="separator"></div>
+        <div class="dropdown-item" onclick="triggerView('zoomin')">Zoom In <span class="shortcut">Ctrl+=</span>
+        </div>
+        <div class="dropdown-item" onclick="triggerView('zoomout')">Zoom Out <span class="shortcut">Ctrl+-</span></div>
+        <div class="dropdown-item" onclick="triggerView('zoomreset')">Reset Zoom</div>
+        <div class="separator"></div>
+        <div class="dropdown-item" onclick="toggleFullscreen()">Toggle Fullscreen <span class="shortcut">F11</span>
+        </div>
+    </div>
+
+    <!-- Go Menu Dropdown -->
+    <div class="dropdown" id="menu-go">
+        <div class="dropdown-item" onclick="triggerGo('file')">Go to File... <span class="shortcut">Ctrl+P</span></div>
+        <div class="dropdown-item" onclick="triggerGo('line')">Go to Line... <span class="shortcut">Ctrl+G</span></div>
+    </div>
+
+    <!-- Run Menu Dropdown -->
+    <div class="dropdown" id="menu-run">
+        <div class="dropdown-item" onclick="executeRun()">Start Debugging <span class="shortcut">F5</span></div>
+        <div class="dropdown-item" onclick="executeRun()">Run Without Debugging <span class="shortcut">Ctrl+F5</span>
+        </div>
+    </div>
+
+    <!-- Terminal Menu Dropdown -->
+    <div class="dropdown" id="menu-terminal">
+        <div class="dropdown-item" onclick="togglePanel()">New Terminal <span class="shortcut">Ctrl+Shift+`</span></div>
+        <div class="dropdown-item" onclick="executeCommand('cls')">Clear Terminal</div>
+    </div>
+
+    <!-- Help Menu Dropdown -->
+    <div class="dropdown" id="menu-help">
+        <div class="dropdown-item" onclick="showWelcome()">Welcome</div>
+        <div class="dropdown-item" onclick="showDocumentation()">Documentation</div>
+        <div class="dropdown-item" onclick="showKeyboardShortcuts()">Keyboard Shortcuts <span class="shortcut">Ctrl+K
+                Ctrl+S</span>
+        </div>
+        <div class="separator"></div>
+        <div class="dropdown-item" onclick="toggleDeveloperTools()">Toggle Developer Tools <span
+                class="shortcut">F12</span>
+        </div>
+        <div class="dropdown-item" onclick="showProcessExplorer()">Open Process Explorer</div>
+        <div class="separator"></div>
+        <div class="dropdown-item" onclick="showAccessibilityOptions()">Accessibility Options</div>
+        <div class="separator"></div>
+        <div class="dropdown-item" onclick="triggerHelp()">About</div>
+        <div class="dropdown-item" onclick="checkUpdates()">Check for Updates...</div>
+    </div>
+
+    </div>
+    <div class="window-title">Web Code Workspace</div>
+    <div class="window-controls">
+        <i class="fas fa-window-minimize" style="padding: 0 8px;"></i>
+        <i class="fas fa-window-maximize" style="padding: 0 8px;"></i>
+        <i class="fas fa-times" style="padding: 0 8px;"></i>
+    </div>
     </div>
 
     <!-- Main Workbench -->
@@ -1835,7 +1896,7 @@
                 } else {
                     // Hide all other dropdowns first
                     $('.dropdown').hide();
-                    
+
                     $dropdown.css({
                         top: (offset.top + 35) + 'px',
                         left: offset.left + 'px',
@@ -1854,7 +1915,7 @@
             });
 
             // AI Input keyboard shortcuts
-            $('#ai-input').on('keydown', function(e) {
+            $('#ai-input').on('keydown', function (e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     sendAIQuery();
@@ -2040,11 +2101,11 @@
         function initTerminal() {
             const terminalContainer = document.getElementById('terminal-container');
             terminalContainer.classList.add('active');
-            
+
             term = new Terminal({
                 cursorBlink: true,
                 cursorStyle: 'block',
-                fontFamily: var(--vscode-mono-font),
+                fontFamily: 'var(--vscode-mono-font)',
                 fontSize: 13,
                 fontWeight: '400',
                 lineHeight: 1.4,
@@ -2082,11 +2143,11 @@
             const fitAddon = new FitAddon.FitAddon();
             const webLinksAddon = new WebLinksAddon.WebLinksAddon();
             const searchAddon = new SearchAddon.SearchAddon();
-            
+
             term.loadAddon(fitAddon);
             term.loadAddon(webLinksAddon);
             term.loadAddon(searchAddon);
-            
+
             term.open(terminalContainer);
             fitAddon.fit();
 
@@ -2110,7 +2171,7 @@
             // Terminal command history
             let commandHistory = [];
             let historyIndex = -1;
-            
+
             // Handle Input
             let currentLine = '';
             term.onData(e => {
@@ -2118,11 +2179,11 @@
                 const container = document.getElementById('terminal-container');
                 container.classList.remove('error');
                 container.classList.add('active');
-                
+
                 switch (e) {
                     case '\r': // Enter
                         term.write('\r\n');
-                        
+
                         // Add to history
                         if (currentLine.trim()) {
                             commandHistory.push(currentLine.trim());
@@ -2131,22 +2192,22 @@
                             }
                             historyIndex = -1;
                         }
-                        
+
                         executeCommand(currentLine);
                         currentLine = '';
                         break;
-                        
+
                     case '\u007F': // Backspace
                         if (currentLine.length > 0) {
                             currentLine = currentLine.substring(0, currentLine.length - 1);
                             term.write('\b \b');
                         }
                         break;
-                        
+
                     case '\u001B': // Arrow keys
                         // Handle arrow up/down for history
                         return; // Let arrow keys be handled separately
-                        
+
                     default:
                         // Basic printable character check
                         if (e >= ' ' && e <= '~') {
@@ -2158,9 +2219,9 @@
             });
 
             // Add keyboard support for history navigation
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 if (document.activeElement !== term.textarea) return;
-                
+
                 if (e.key === 'ArrowUp') {
                     e.preventDefault();
                     if (historyIndex === -1) {
@@ -2168,7 +2229,7 @@
                     } else if (historyIndex > 0) {
                         historyIndex--;
                     }
-                    
+
                     if (historyIndex >= 0 && historyIndex < commandHistory.length) {
                         // Clear current line
                         for (let i = 0; i < currentLine.length; i++) {
@@ -2178,7 +2239,7 @@
                         term.write(currentLine);
                     }
                 }
-                
+
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     if (historyIndex === -1) {
@@ -2186,7 +2247,7 @@
                     } else if (historyIndex < commandHistory.length - 1) {
                         historyIndex++;
                     }
-                    
+
                     if (historyIndex >= 0 && historyIndex < commandHistory.length) {
                         // Clear current line
                         for (let i = 0; i < currentLine.length; i++) {
@@ -2202,13 +2263,13 @@
                         currentLine = '';
                     }
                 }
-                
+
                 if (e.key === 'Tab') {
                     e.preventDefault();
                     // Simple autocomplete for common commands
                     const commands = ['ls', 'cd ', 'php ', 'git ', 'help', 'clear', 'exit'];
                     const matches = commands.filter(cmd => cmd.startsWith(currentLine));
-                    
+
                     if (matches.length === 1) {
                         const completion = matches[0];
                         const remainder = completion.substring(currentLine.length);
@@ -2232,12 +2293,12 @@
 
             // Handle built-in commands first
             const trimmedCmd = cmd.trim();
-            
+
             if (trimmedCmd === 'help') {
                 showHelp();
                 return;
             }
-            
+
             if (trimmedCmd === 'exit' || trimmedCmd === 'quit') {
                 term.writeln('\r\nGoodbye! Type \x1b[38;5;34mhelp\x1b[0m to return to the terminal.');
                 return;
@@ -2270,14 +2331,14 @@
                 timeout: 30000,
                 data: JSON.stringify({ command: cmd, cwd: currentCwd }),
                 contentType: 'application/json',
-                beforeSend: function() {
+                beforeSend: function () {
                     term.write('\x1b[38;5;46m⏳ Executing...\x1b[0m');
                 },
                 success: function (res) {
                     if (res.output) {
                         // Clear loading indicator
                         term.write('\r\x1b[K');
-                        
+
                         // Fix line endings for xterm
                         let out = res.output;
                         if (out.endsWith('\n') || out.endsWith('\r\n')) {
@@ -2295,14 +2356,14 @@
                 error: function (xhr, status, error) {
                     // Clear loading indicator
                     term.write('\r\x1b[K');
-                    
+
                     let errorMsg = 'Command failed';
                     if (status === 'timeout') {
                         errorMsg = 'Command timed out';
                     } else if (status >= 500) {
                         errorMsg = 'Server error';
                     }
-                    
+
                     container.classList.remove('active');
                     container.classList.add('error');
                     term.writeln(`\r\n\x1b[38;5;196m✗ ${errorMsg}\x1b[0m`);
@@ -2509,16 +2570,16 @@
         /* Menu Actions */
         function triggerEdit(action) {
             console.log('TriggerEdit called with action:', action);
-            
+
             if (!editor) {
                 showNotification('No file is currently open. Please create or open a file first.', 'error');
                 return;
             }
-            
+
             editor.focus();
-            
+
             try {
-                switch(action) {
+                switch (action) {
                     case 'undo':
                         editor.trigger('menu', 'undo');
                         showNotification('Undo action performed', 'info');
@@ -2562,7 +2623,7 @@
                     default:
                         showNotification('Edit action not implemented: ' + action, 'error');
                 }
-            } catch(error) {
+            } catch (error) {
                 console.error('Edit action failed:', action, error);
                 showNotification('Action failed. Please use keyboard shortcuts instead.', 'error');
             }
@@ -2781,43 +2842,43 @@
         // Helper function to format AI response
         function formatAIResponse(response) {
             if (!response) return '';
-            
+
             let formatted = response;
-            
+
             // Escape HTML first to prevent XSS
             formatted = escapeHtml(formatted);
-            
+
             // Format code blocks with language detection and copy button
-            formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, function(match, lang, code) {
+            formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, function (match, lang, code) {
                 const copyId = 'copy-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 return `<pre><button class="copy-code-btn" onclick="copyCode('${copyId}', this)" data-id="${copyId}">Copy</button><code id="${copyId}" class="language-${lang || 'text'}">${code}</code></pre>`;
             });
-            
+
             // Format inline code
             formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
-            
+
             // Format bold text
             formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
+
             // Format italic text
             formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            
+
             // Format lists
             formatted = formatted.replace(/^(\s*)[-*+]\s+(.+)$/gm, '$1<li>$2</li>');
             formatted = formatted.replace(/^(\s*)\d+\.\s+(.+)$/gm, '$1<li>$2</li>');
-            
+
             // Wrap consecutive list items
             formatted = formatted.replace(/(<li>.*<\/li>\s*)+/gs, '<ul>$&</ul>');
-            
+
             // Format line breaks
             formatted = formatted.replace(/\n\n/g, '</p><p>');
             formatted = formatted.replace(/\n/g, '<br>');
-            
+
             // Add paragraph wrapper if there are multiple paragraphs
             if (formatted.includes('</p><p>')) {
                 formatted = '<p>' + formatted + '</p>';
             }
-            
+
             return formatted;
         }
 
@@ -2825,17 +2886,17 @@
         function copyCode(elementId, button) {
             const codeElement = document.getElementById(elementId);
             if (codeElement) {
-                navigator.clipboard.writeText(codeElement.textContent).then(function() {
+                navigator.clipboard.writeText(codeElement.textContent).then(function () {
                     // Visual feedback
                     const originalText = button.textContent;
                     button.textContent = 'Copied!';
                     button.classList.add('copied');
-                    
-                    setTimeout(function() {
+
+                    setTimeout(function () {
                         button.textContent = originalText;
                         button.classList.remove('copied');
                     }, 2000);
-                }).catch(function(err) {
+                }).catch(function (err) {
                     console.error('Failed to copy code: ', err);
                     // Fallback for older browsers
                     const textArea = document.createElement('textarea');
@@ -2844,10 +2905,10 @@
                     textArea.select();
                     document.execCommand('copy');
                     document.body.removeChild(textArea);
-                    
+
                     button.textContent = 'Copied!';
                     button.classList.add('copied');
-                    setTimeout(function() {
+                    setTimeout(function () {
                         button.textContent = 'Copy';
                         button.classList.remove('copied');
                     }, 2000);
@@ -2901,7 +2962,7 @@
 
         // Conversation Management
         let conversationId = localStorage.getItem('ai_conversation_id') || generateConversationId();
-        
+
         function generateConversationId() {
             const id = 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('ai_conversation_id', id);
@@ -2937,10 +2998,10 @@
                     <div class="ai-prompt-content">${escapeHtml(prompt)}</div>
                 </div>
             `);
-            
+
             $('#ai-input').val('');
             $('#ai-send-btn').prop('disabled', true);
-            
+
             // Enhanced loading indicator
             const loadingId = 'loading-' + Date.now();
             $('#ai-messages').append(`
@@ -2952,7 +3013,7 @@
                     </div>
                 </div>
             `);
-            
+
             // Auto-scroll
             const messagesContainer = document.getElementById('ai-messages');
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -2982,21 +3043,21 @@
                 url: 'ai_assistant.php',
                 method: 'POST',
                 timeout: 30000, // 30 second timeout
-                data: JSON.stringify({ 
-                    prompt, 
-                    context: fullContext, 
-                    language, 
-                    conversation_id: conversationId 
+                data: JSON.stringify({
+                    prompt,
+                    context: fullContext,
+                    language,
+                    conversation_id: conversationId
                 }),
                 contentType: 'application/json',
                 success: function (res) {
                     clearInterval(loadingInterval);
                     $('#' + loadingId).remove();
-                    
+
                     if (res.success) {
                         const responseTimestamp = new Date().toLocaleTimeString();
                         const formatted = formatAIResponse(res.response);
-                        
+
                         $('#ai-messages').append(`
                             <div class="ai-message assistant">
                                 <strong>AI:</strong>
@@ -3004,7 +3065,7 @@
                                 ${res.cached ? '<span class="ai-cached-badge">⚡ Cached</span>' : ''}
                                 <div class="ai-response-content">${formatted}</div>
                                 <div class="ai-actions">
-                                    <button class="ai-action-btn" onclick="copyToClipboard('${escapeHtml(res.response)}')" title="Copy response">
+                                    <button class="ai-action-btn" onclick="copyToClipboard(decodeURIComponent('${encodeURIComponent(res.response)}'))" title="Copy response">
                                         <i class="fas fa-copy"></i>
                                     </button>
                                     <button class="ai-action-btn" onclick="regenerateResponse()" title="Regenerate response">
@@ -3033,7 +3094,7 @@
                             </div>
                         `);
                     }
-                    
+
                     messagesContainer.scrollTop = messagesContainer.scrollHeight;
                     $('#ai-send-btn').prop('disabled', false);
                     $('#ai-input').focus();
@@ -3050,9 +3111,9 @@
 
         // Helper functions for AI actions
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(function() {
+            navigator.clipboard.writeText(text).then(function () {
                 showNotification('Response copied to clipboard!', 'success');
-            }).catch(function(err) {
+            }).catch(function (err) {
                 // Fallback
                 const textArea = document.createElement('textarea');
                 textArea.value = text;
@@ -3083,13 +3144,13 @@
         function checkAIStatus() {
             showNotification('Checking AI service status...', 'info');
             // Check if AI service is available
-            $.get('ai_assistant.php', function(data) {
+            $.get('ai_assistant.php', function (data) {
                 if (data && !data.error) {
                     showNotification('AI service is operational', 'success');
                 } else {
                     showNotification('AI service is experiencing issues', 'error');
                 }
-            }).fail(function() {
+            }).fail(function () {
                 showNotification('Cannot connect to AI service', 'error');
             });
         }
@@ -3101,9 +3162,9 @@
                     ${message}
                 </div>
             `);
-            
+
             $('body').append(notification);
-            
+
             // Auto-remove after 3 seconds
             setTimeout(() => {
                 notification.addClass('fade-out');
@@ -3116,8 +3177,8 @@
         // Update sendAIQuery to store last query
         function initAIQueryTracking() {
             const originalSendAIQuery = sendAIQuery;
-            
-            sendAIQuery = function() {
+
+            sendAIQuery = function () {
                 const prompt = $('#ai-input').val().trim();
                 if (!prompt) return;
 
