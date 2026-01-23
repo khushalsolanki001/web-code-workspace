@@ -1501,28 +1501,21 @@
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerEdit('cut')">Cut <span class="shortcut">Ctrl+X</span></div>
                 <div class="dropdown-item" onclick="triggerEdit('copy')">Copy <span class="shortcut">Ctrl+C</span></div>
-                <div class="dropdown-item" onclick="triggerEdit('paste')">Paste <span class="shortcut">Ctrl+V</span>
-                </div>
-                <div class="dropdown-item" onclick="selectLine()">Select Line <span class="shortcut">Ctrl+L</span>
-                </div>
-                <div class="dropdown-item" onclick="deleteLine()">Delete Line <span class="shortcut">Ctrl+Shift+K</span>
-                </div>
+                <div class="dropdown-item" onclick="triggerEdit('paste')">Paste <span class="shortcut">Ctrl+V</span></div>
+                <div class="separator"></div>
+                <div class="dropdown-item" onclick="selectLine()">Select Line <span class="shortcut">Ctrl+L</span></div>
+                <div class="dropdown-item" onclick="deleteLine()">Delete Line <span class="shortcut">Ctrl+Shift+K</span></div>
                 <div class="separator"></div>
                 <div class="dropdown-item" onclick="triggerEdit('find')">Find <span class="shortcut">Ctrl+F</span></div>
-                <div class="dropdown-item" onclick="triggerEdit('replace')">Replace <span class="shortcut">Ctrl+H</span>
-                </div>
-                <div class="dropdown-item" onclick="findInFiles()">Find in Files <span
-                        class="shortcut">Ctrl+Shift+F</span>
-                </div>
+                <div class="dropdown-item" onclick="triggerEdit('replace')">Replace <span class="shortcut">Ctrl+H</span></div>
+                <div class="dropdown-item" onclick="findInFiles()">Find in Files <span class="shortcut">Ctrl+Shift+F</span></div>
                 <div class="separator"></div>
-                <div class="dropdown-item" onclick="triggerEdit('comment')">Toggle Line Comment <span
-                        class="shortcut">Ctrl+/</span></div>
-                <div class="dropdown-item" onclick="toggleBlockComment()">Toggle Block Comment <span
-                        class="shortcut">Ctrl+Shift+A</span></div>
+                <div class="dropdown-item" onclick="triggerEdit('comment')">Toggle Line Comment <span class="shortcut">Ctrl+/</span></div>
+                <div class="dropdown-item" onclick="toggleBlockComment()">Toggle Block Comment <span class="shortcut">Ctrl+Shift+A</span></div>
                 <div class="separator"></div>
-                <div class="dropdown-item" onclick="triggerEdit('format')">Format Document <span
-                        class="shortcut">Shift+Alt+F</span></div>
-                <div class="dropdown-item" onclick="formatSelection()">Format Selection <span class="shortcut">Ctrl+K
+                <div class="dropdown-item" onclick="triggerEdit('format')">Format Document <span class="shortcut">Shift+Alt+F</span></div>
+                <div class="dropdown-item" onclick="formatSelection()">Format Selection <span class="shortcut">Ctrl+K Ctrl+F</span></div>
+            </div>
                         Ctrl+F</span>
                 </div>
             </div>
@@ -1772,15 +1765,20 @@
                 let offset = $(this).offset();
                 let $dropdown = $('#menu-' + menu);
 
+
+
                 if ($dropdown.is(':visible')) {
                     $dropdown.hide();
                 } else {
+                    // Hide all other dropdowns first
+                    $('.dropdown').hide();
+                    
                     $dropdown.css({
-                        top: (offset.top + 28) + 'px',
+                        top: (offset.top + 35) + 'px',
                         left: offset.left + 'px',
                         display: 'block',
                         zIndex: 10001
-                    });
+                    }).addClass('fade-in');
                 }
             });
 
@@ -1863,6 +1861,66 @@
                     sendAIQuery();
                     return false;
                 }
+            }
+            // Ctrl+Z for Undo
+            if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                triggerEdit('undo');
+                return false;
+            }
+            // Ctrl+Y for Redo
+            if (e.ctrlKey && e.key === 'y') {
+                e.preventDefault();
+                triggerEdit('redo');
+                return false;
+            }
+            // Ctrl+X for Cut
+            if (e.ctrlKey && e.key === 'x') {
+                e.preventDefault();
+                triggerEdit('cut');
+                return false;
+            }
+            // Ctrl+C for Copy
+            if (e.ctrlKey && e.key === 'c') {
+                e.preventDefault();
+                triggerEdit('copy');
+                return false;
+            }
+            // Ctrl+V for Paste
+            if (e.ctrlKey && e.key === 'v') {
+                e.preventDefault();
+                triggerEdit('paste');
+                return false;
+            }
+            // Ctrl+F for Find
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                triggerEdit('find');
+                return false;
+            }
+            // Ctrl+H for Replace
+            if (e.ctrlKey && e.key === 'h') {
+                e.preventDefault();
+                triggerEdit('replace');
+                return false;
+            }
+            // Ctrl+/ for Toggle Comment
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                triggerEdit('comment');
+                return false;
+            }
+            // Ctrl+Shift+A for Toggle Block Comment
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                e.preventDefault();
+                triggerEdit('blockcomment');
+                return false;
+            }
+            // Ctrl+Shift+F for Format Document
+            if (e.ctrlKey && e.shiftKey && e.key === 'F') {
+                e.preventDefault();
+                triggerEdit('format');
+                return false;
             }
         }, { capture: true });
 
@@ -2171,20 +2229,64 @@
 
         /* Menu Actions */
         function triggerEdit(action) {
-            if (!editor) return;
-            editor.focus();
-            if (action === 'undo') editor.trigger('menu', 'undo');
-            if (action === 'redo') editor.trigger('menu', 'redo');
-            if (action === 'cut') {
-                alert('For Cut/Copy/Paste, please use keyboard shortcuts (Ctrl+X/C/V) due to browser security.');
+            console.log('TriggerEdit called with action:', action);
+            
+            if (!editor) {
+                showNotification('No file is currently open. Please create or open a file first.', 'error');
+                return;
             }
-            if (action === 'copy') alert('Use Ctrl+C');
-            if (action === 'paste') alert('Use Ctrl+V');
-            if (action === 'find') editor.trigger('menu', 'actions.find');
-            if (action === 'replace') editor.trigger('menu', 'editor.action.startFindReplaceAction');
-            if (action === 'comment') editor.trigger('menu', 'editor.action.commentLine');
-            if (action === 'blockcomment') editor.trigger('menu', 'editor.action.blockComment');
-            if (action === 'format') editor.trigger('menu', 'editor.action.formatDocument');
+            
+            editor.focus();
+            
+            try {
+                switch(action) {
+                    case 'undo':
+                        editor.trigger('menu', 'undo');
+                        showNotification('Undo action performed', 'info');
+                        break;
+                    case 'redo':
+                        editor.trigger('menu', 'redo');
+                        showNotification('Redo action performed', 'info');
+                        break;
+                    case 'cut':
+                        editor.trigger('menu', 'editor.action.clipboardCutAction');
+                        showNotification('Cut action performed', 'info');
+                        break;
+                    case 'copy':
+                        editor.trigger('menu', 'editor.action.clipboardCopyAction');
+                        showNotification('Copy action performed', 'info');
+                        break;
+                    case 'paste':
+                        editor.trigger('menu', 'editor.action.clipboardPasteAction');
+                        showNotification('Paste action performed', 'info');
+                        break;
+                    case 'find':
+                        editor.trigger('menu', 'actions.find');
+                        showNotification('Find dialog opened', 'info');
+                        break;
+                    case 'replace':
+                        editor.trigger('menu', 'editor.action.startFindReplaceAction');
+                        showNotification('Replace dialog opened', 'info');
+                        break;
+                    case 'comment':
+                        editor.trigger('menu', 'editor.action.commentLine');
+                        showNotification('Toggle line comment', 'info');
+                        break;
+                    case 'blockcomment':
+                        editor.trigger('menu', 'editor.action.blockComment');
+                        showNotification('Toggle block comment', 'info');
+                        break;
+                    case 'format':
+                        editor.trigger('menu', 'editor.action.formatDocument');
+                        showNotification('Document formatted', 'info');
+                        break;
+                    default:
+                        showNotification('Edit action not implemented: ' + action, 'error');
+                }
+            } catch(error) {
+                console.error('Edit action failed:', action, error);
+                showNotification('Action failed. Please use keyboard shortcuts instead.', 'error');
+            }
         }
 
         function triggerSelection(action) {
@@ -2730,6 +2832,8 @@
             }, 3000);
         }
 
+
+
         // Update sendAIQuery to store last query
         function initAIQueryTracking() {
             const originalSendAIQuery = sendAIQuery;
@@ -2749,40 +2853,6 @@
                 // Call original function
                 return originalSendAIQuery.call(this);
             };
-        }
-                error: function (xhr, status, error) {
-                    clearInterval(loadingInterval);
-                    $('#' + loadingId).remove();
-                    
-                    let errorMessage = 'Failed to connect to AI service';
-                    if (status === 'timeout') {
-                        errorMessage = 'Request timed out. Please try again.';
-                    } else if (xhr.status === 429) {
-                        errorMessage = 'Too many requests. Please wait a moment before trying again.';
-                    } else if (xhr.status >= 500) {
-                        errorMessage = 'AI service is temporarily unavailable. Please try again later.';
-                    }
-                    
-                    $('#ai-messages').append(`
-                        <div class="ai-message assistant ai-error-message">
-                            <strong>🔌 Connection Error:</strong>
-                            <div class="ai-error-content">${errorMessage}</div>
-                            <div class="ai-error-actions">
-                                <button class="ai-action-btn" onclick="retryLastQuery()" title="Retry">
-                                    <i class="fas fa-redo"></i> Retry
-                                </button>
-                                <button class="ai-action-btn" onclick="checkAIStatus()" title="Check service status">
-                                    <i class="fas fa-info-circle"></i> Status
-                                </button>
-                            </div>
-                        </div>
-                    `);
-                    
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                    $('#ai-send-btn').prop('disabled', false);
-                    $('#ai-input').focus();
-                }
-            });
         }
 
         // File Operations
