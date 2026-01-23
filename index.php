@@ -1123,6 +1123,7 @@
             if (action === 'find') editor.trigger('menu', 'actions.find');
             if (action === 'replace') editor.trigger('menu', 'editor.action.startFindReplaceAction');
             if (action === 'comment') editor.trigger('menu', 'editor.action.commentLine');
+            if (action === 'blockcomment') editor.trigger('menu', 'editor.action.blockComment');
             if (action === 'format') editor.trigger('menu', 'editor.action.formatDocument');
         }
 
@@ -1166,6 +1167,123 @@
         function triggerHelp() {
             alert('VS Code Web Clone\n\nA lightweight PHP-based cloud IDE mimicking Visual Studio Code.\n\nVersion 1.0.0');
         }
+
+        // AI Assistant Functions
+        var autoSaveEnabled = false;
+        var autoSaveInterval;
+
+        function toggleAIPanel() {
+            $('#ai-panel').toggleClass('open');
+        }
+
+        function sendAIQuery() {
+            const prompt = $('#ai-input').val().trim();
+            if (!prompt) return;
+
+            const selection = editor.getSelection();
+            const codeContext = editor.getModel().getValueInRange(selection) || editor.getValue();
+            const language = $('#status-lang').text().toLowerCase();
+
+            // Add user message
+            $('#ai-messages').append(`<div class="ai-message user">${prompt}</div>`);
+            $('#ai-input').val('');
+            $('#ai-send-btn').prop('disabled', true);
+            $('#ai-messages').append('<div class="ai-loading"><i class="fas fa-spinner fa-spin"></i> Thinking...</div>');
+
+            $.ajax({
+                url: 'ai_assistant.php',
+                method: 'POST',
+                data: JSON.stringify({ prompt, context: codeContext, language }),
+                contentType: 'application/json',
+                success: function(res) {
+                    $('.ai-loading').remove();
+                    if (res.success) {
+                        const formatted = res.response.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+                        $('#ai-messages').append(`<div class="ai-message assistant">${formatted}</div>`);
+                    } else {
+                        $('#ai-messages').append(`<div class="ai-message assistant" style="color:red;">Error: ${res.error}</div>`);
+                    }
+                    $('#ai-messages').scrollTop($('#ai-messages')[0].scrollHeight);
+                    $('#ai-send-btn').prop('disabled', false);
+                },
+                error: function() {
+                    $('.ai-loading').remove();
+                    $('#ai-messages').append('<div class="ai-message assistant" style="color:red;">Failed to connect to AI service</div>');
+                    $('#ai-send-btn').prop('disabled', false);
+                }
+            });
+        }
+
+        // File Operations
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $.post('file_manager.php', { action: 'write', path: file.name, content: e.target.result }, function(res) {
+                        if (res.success) {
+                            loadExplorer();
+                            openFile(file.name);
+                        } else {
+                            alert('Error uploading: ' + res.error);
+                        }
+                    }, 'json');
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        function saveFileAs() {
+            if (!editor || !currentFile) return;
+            const newName = prompt('Save as:', currentFile);
+            if (newName) {
+                const content = editor.getValue();
+                $.post('file_manager.php', { action: 'write', path: newName, content }, function(res) {
+                    if (res.success) {
+                        currentFile = newName;
+                        loadExplorer();
+                        alert('Saved as: ' + newName);
+                    } else {
+                        alert('Error: ' + res.error);
+                    }
+                }, 'json');
+            }
+        }
+
+        function toggleAutoSave() {
+            autoSaveEnabled = !autoSaveEnabled;
+            $('#autosave-indicator').text(autoSaveEnabled ? '✓' : '');
+            if (autoSaveEnabled) {
+                autoSaveInterval = setInterval(() => {
+                    if (editor && currentFile) saveFile();
+                }, 5000);
+            } else {
+                clearInterval(autoSaveInterval);
+            }
+        }
+
+        function closeWorkspace() {
+            if (confirm('Close workspace? Unsaved changes will be lost.')) {
+                location.reload();
+            }
+        }
+
+        // Add Ctrl+I keybinding for AI
+        $(document).ready(function() {
+            $(document).keydown(function(e) {
+                if (e.ctrlKey && e.key === 'i') {
+                    e.preventDefault();
+                    toggleAIPanel();
+                }
+            });
+
+            // Enter to send AI query
+            $('#ai-input').keydown(function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    sendAIQuery();
+                }
+            });
+        });
     </script>
 
     <!-- AI Assistant Panel -->
